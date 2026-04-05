@@ -11,7 +11,7 @@ export const CartProvider = ({ children }) => {
 	const fetchCart = async () => {
 		try {
 			setLoading(true);
-			const res = await apiRequest.get("/cart"); // ← Fixed path
+			const res = await apiRequest.get("/cart");
 			const items = res.data.cart || [];
 			setCartItems(items);
 		} catch (err) {
@@ -30,7 +30,6 @@ export const CartProvider = ({ children }) => {
 	// Calculate total count
 	const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-	// Function to manually refresh cart (call after add/remove/clear)
 	const refreshCart = () => {
 		fetchCart();
 	};
