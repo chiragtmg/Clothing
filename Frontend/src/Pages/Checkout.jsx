@@ -137,7 +137,6 @@ const Checkout = () => {
 		}
 	};
 
-	// ── Handle Place Order button ───────────────────────────────────────────────
 	const handlePlaceOrder = () => {
 		if (paymentMethod === "cod") {
 			handleCOD();
