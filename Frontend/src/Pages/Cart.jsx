@@ -83,7 +83,6 @@ const Cart = () => {
 		}
 	};
 
-	// Remove item
 	const removeItem = async (productId) => {
 		try {
 			const res = await apiRequest.delete(`/cart/remove/${productId}`);
