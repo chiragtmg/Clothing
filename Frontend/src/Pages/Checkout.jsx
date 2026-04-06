@@ -143,7 +143,36 @@ const Checkout = () => {
 		} else if (paymentMethod === "esewa") {
 			handleEsewaPayment();
 		} else if (paymentMethod === "khalti") {
-			toast.info("Khalti payment coming soon...");
+			handleKhaltiPayment();
+		}
+	};
+
+	// Replace your existing handleKhaltiPayment (or the toast.info line) in Checkout.js
+	// with this function:
+
+	const handleKhaltiPayment = async () => {
+		if (!validateForm()) return;
+
+		try {
+			// Save cart + shipping to localStorage BEFORE redirecting
+			// We'll need them again on the success page to create the order
+			localStorage.setItem("khalti_cart", JSON.stringify(cartItems));
+			localStorage.setItem("khalti_shipping", JSON.stringify(formData));
+			localStorage.setItem("khalti_total", total);
+
+			const res = await apiRequest.post("/khalti/initiate", {
+				amount: total, // in NPR (backend will convert to paisa)
+				cartItems,
+				shippingDetails: formData,
+			});
+
+			if (res.data.success) {
+				// Redirect user to Khalti payment page
+				window.location.href = res.data.paymentUrl;
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error("Failed to start Khalti payment");
 		}
 	};
 

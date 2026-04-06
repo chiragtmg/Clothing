@@ -22,6 +22,7 @@ import Search from "./Pages/Search";
 import Checkout from "./Pages/Checkout";
 import MyOrders from "./Pages/MyOrders";
 import PaymentSuccess from "./Pages/PaymentSuccess";
+import KhaltiSuccess from "./Pages/KhaltiSuccess";
 
 const App = () => {
 	const GoogleAuthWrapper = () => {
@@ -48,6 +49,7 @@ const App = () => {
 				<Route path="/signup" element={<SignUp />} />
 				<Route path="/myorders" element={<MyOrders />} />
 				<Route path="/paymentsuccess" element={<PaymentSuccess />} />
+				<Route path="/khaltisuccess" element={<KhaltiSuccess />} />
 				<Route path="/editProfile" element={<EditProfile />} />
 				<Route path="*" element={<Home />} />
 				<Route path="/search" element={<Search />} />
