@@ -6,7 +6,7 @@ import { useCart } from "../context/CartContext";
 const KhaltiSuccess = () => {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
-  const { refreshCart } = useCart();
+	const { refreshCart } = useCart();
 
 	const [status, setStatus] = useState("verifying");
 	const [message, setMessage] = useState("Verifying your payment...");

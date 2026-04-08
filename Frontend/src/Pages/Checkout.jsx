@@ -116,6 +116,10 @@ const Checkout = () => {
 			if (res.data.success) {
 				const { esewaUrl, paymentData } = res.data;
 
+				localStorage.setItem("cartItems", JSON.stringify(cartItems));
+				localStorage.setItem("shippingDetails", JSON.stringify(formData));
+				localStorage.setItem("totalAmount", total);
+
 				const form = document.createElement("form");
 				form.method = "POST";
 				form.action = esewaUrl;

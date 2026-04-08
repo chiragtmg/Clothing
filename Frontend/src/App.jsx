@@ -48,7 +48,7 @@ const App = () => {
 				<Route path="/login" element={<GoogleAuthWrapper />} />
 				<Route path="/signup" element={<SignUp />} />
 				<Route path="/myorders" element={<MyOrders />} />
-				<Route path="/paymentsuccess" element={<PaymentSuccess />} />
+				<Route path="/payment/success" element={<PaymentSuccess />} />
 				<Route path="/khalti-success" element={<KhaltiSuccess />} />
 				<Route path="/editProfile" element={<EditProfile />} />
 				<Route path="*" element={<Home />} />

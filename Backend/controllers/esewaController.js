@@ -1,27 +1,18 @@
 // controllers/esewaController.js
-import cryptoJs from "crypto-js";
+import crypto from "crypto";
 
 const ESEWA_SECRET_KEY = "8gBm/:&EnhH.1/q";
 const ESEWA_PRODUCT_CODE = "EPAYTEST";
 const ESEWA_PAYMENT_URL = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
 
-// 🔐 Generate Signature (FIXED + DEBUG)
+// 🔐 Generate Signature (Friend's working method)
 const generateSignature = (total_amount, transaction_uuid) => {
-  const message =
-    `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${ESEWA_PRODUCT_CODE}`.trim();
-
-  // 🔍 DEBUG LOGS
+  const message = `total_amount=${total_amount},transaction_uuid=${transaction_uuid},product_code=${ESEWA_PRODUCT_CODE}`;
+  const signature = crypto.createHmac("sha256", ESEWA_SECRET_KEY).update(message).digest("base64");
   console.log("====== SIGNATURE DEBUG ======");
-  console.log("Message (raw):", message);
-  console.log("Message (JSON):", JSON.stringify(message)); // shows hidden chars
-  console.log("Message Length:", message.length);
-
-  const hash = cryptoJs.HmacSHA256(message, ESEWA_SECRET_KEY);
-  const signature = cryptoJs.enc.Base64.stringify(hash);
-
+  console.log("Message:", message);
   console.log("Generated Signature:", signature);
-  console.log("============================");
-
+  console.log("=============================");
   return signature;
 };
 
@@ -35,20 +26,20 @@ export const initiatePayment = async (req, res) => {
       product_delivery_charge = 0,
     } = req.body;
 
-    // ✅ SAFE UUID
+    // ✅ Generate safe transaction UUID
     const transaction_uuid = `TXN-${Date.now()}`;
 
-    // ✅ EXACT TOTAL (VERY IMPORTANT)
-    const total_amount = String(
+    // ✅ Calculate exact total amount
+    const total_amount = (
       Number(amount) +
-        Number(tax_amount) +
-        Number(product_service_charge) +
-        Number(product_delivery_charge)
-    );
+      Number(tax_amount) +
+      Number(product_service_charge) +
+      Number(product_delivery_charge)
+    ).toFixed(2);
 
     const signature = generateSignature(total_amount, transaction_uuid);
 
-    const FRONTEND_URL = "http://localhost:5173";
+    const FRONTEND_URL = "http://localhost:5173"; // Update your frontend URL
 
     const paymentData = {
       amount: String(amount),
@@ -64,17 +55,8 @@ export const initiatePayment = async (req, res) => {
       signature: String(signature),
     };
 
-    // 🔍 FINAL DEBUG BEFORE SENDING
     console.log("====== FINAL PAYMENT DATA ======");
     console.log(JSON.stringify(paymentData, null, 2));
-
-    // 🔍 CHECK FOR UNDEFINED VALUES
-    Object.entries(paymentData).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === "") {
-        console.error(`❌ Missing value for: ${key}`);
-      }
-    });
-
     console.log("================================");
 
     res.json({
@@ -88,16 +70,16 @@ export const initiatePayment = async (req, res) => {
   }
 };
 
-// ✅ Verify Payment (FIXED + DEBUG)
+// ✅ Verify Payment
 export const verifyPayment = async (req, res) => {
   try {
     const { data } = req.body;
 
     if (!data) {
-      return res.status(400).json({ success: false, message: "No data" });
+      return res.status(400).json({ success: false, message: "No data provided" });
     }
 
-    // Decode Base64
+    // Decode Base64 and parse JSON
     const decodedStr = Buffer.from(data, "base64").toString("utf-8");
     const decoded = JSON.parse(decodedStr);
 
@@ -111,29 +93,21 @@ export const verifyPayment = async (req, res) => {
       return res.json({ success: false, message: `Payment ${status}` });
     }
 
-    // 🔥 CORRECT SIGNATURE VERIFICATION
+    // 🔥 Recreate signature for verification
     const message = signed_field_names
       .split(",")
       .map((field) => `${field}=${decoded[field]}`)
-      .join(",")
-      .trim();
+      .join(",");
+    
+    const expectedSignature = crypto.createHmac("sha256", ESEWA_SECRET_KEY).update(message).digest("base64");
 
     console.log("Verify Message:", message);
-    console.log("Verify Message JSON:", JSON.stringify(message));
-    console.log("Verify Message Length:", message.length);
-
-    const hash = cryptoJs.HmacSHA256(message, ESEWA_SECRET_KEY);
-    const expectedSignature = cryptoJs.enc.Base64.stringify(hash);
-
     console.log("Expected Signature:", expectedSignature);
     console.log("Received Signature:", signature);
 
     if (expectedSignature !== signature) {
       console.error("❌ Signature mismatch!");
-      return res.status(400).json({
-        success: false,
-        message: "Invalid signature",
-      });
+      return res.status(400).json({ success: false, message: "Invalid signature" });
     }
 
     console.log("✅ Payment Verified Successfully");
