@@ -1,10 +1,6 @@
 import axios from "axios";
 import Order from "../models/orderModel.js";
 
-// ---------------------------------------------------
-// ✅ IMPORTANT CONFIG
-// ---------------------------------------------------
-
 // 🔑 Use SECRET KEY from: https://test-admin.khalti.com
 const KHALTI_SECRET_KEY = process.env.KHALTI_SECRET_KEY;
 
@@ -16,9 +12,6 @@ const KHALTI_LOOKUP_URL = "https://dev.khalti.com/api/v2/epayment/lookup/";
 console.log("Khalti Key:", KHALTI_SECRET_KEY);
 console.log("Khalti URL:", KHALTI_INITIATE_URL);
 
-// ---------------------------------------------------
-// STEP 1: Initiate Payment
-// ---------------------------------------------------
 export const initiateKhaltiPayment = async (req, res) => {
 	try {
 		const { amount, cartItems, shippingDetails } = req.body;
@@ -74,15 +67,23 @@ export const initiateKhaltiPayment = async (req, res) => {
 	}
 };
 
-// ---------------------------------------------------
-// STEP 2: Verify Payment
-// ---------------------------------------------------
 export const verifyKhaltiPayment = async (req, res) => {
 	try {
-		const { pidx, cartItems, shippingDetails, totalAmount } = req.body;
+		const { pidx } = req.body;
 
+		if (!pidx) {
+			return res.status(400).json({
+				success: false,
+				message: "pidx is required",
+			});
+		}
+
+		// Get pending order from localStorage data sent? (optional - better to save in DB)
+		const pendingOrder = req.body.pendingOrder || {}; // remove if not sending
+		console.log("Pending order received:", JSON.stringify(pendingOrder));
+		// 1. Verify with Khalti
 		const response = await axios.post(
-			KHALTI_LOOKUP_URL,
+			KHALTI_LOOKUP_URL, // Must be: https://dev.khalti.com/api/v2/epayment/lookup/  (test) or production
 			{ pidx },
 			{
 				headers: {
@@ -94,45 +95,52 @@ export const verifyKhaltiPayment = async (req, res) => {
 
 		const paymentInfo = response.data;
 
-		// ✅ ONLY "Completed" = success (as per docs)
-		if (paymentInfo.status === "Completed") {
-			const orderData = {
-				items: cartItems.map((item) => ({
+		if (paymentInfo.status !== "Completed") {
+			return res.status(400).json({
+				success: false,
+				message: `Payment not completed. Status: ${paymentInfo.status}`,
+			});
+		}
+
+		// 2. Create Order
+		const orderData = {
+			items:
+				pendingOrder.cartItems?.map((item) => ({
 					productId: item.productId,
 					name: item.name,
 					price: item.price,
 					quantity: item.quantity,
 					size: item.size || "One Size",
 					image: item.image || "",
-				})),
-				shippingDetails,
-				paymentMethod: "khalti",
-				totalAmount,
-				paymentStatus: "paid",
-				transactionId: paymentInfo.transaction_id,
-			};
+				})) || [],
+			shippingDetails: pendingOrder.shippingDetails,
+			paymentMethod: "khalti",
+			totalAmount: pendingOrder.totalAmount,
+			paymentStatus: "paid",
+			transactionId: paymentInfo.transaction_id || paymentInfo.idx,
+			user: pendingOrder.userId || req.user?._id, // optional
+		};
 
-			await Order.create(orderData);
+		const newOrder = await Order.create(orderData);
 
-			return res.json({
-				success: true,
-				message: "Payment verified and order placed!",
-			});
-		} else {
-			return res.status(400).json({
-				success: false,
-				message: `Payment not completed. Status: ${paymentInfo.status}`,
-			});
-		}
+		console.log(`✅ Order created! ID: ${newOrder._id}`);
+
+		return res.json({
+			success: true,
+			message: "Payment verified and order placed successfully!",
+			orderId: newOrder._id,
+		});
 	} catch (error) {
-		console.error(
-			"Khalti verify error:",
-			error.response?.data || error.message,
-		);
+		console.error("Khalti verify error details:", {
+			message: error.message,
+			response: error.response?.data,
+			status: error.response?.status,
+		});
 
 		return res.status(500).json({
 			success: false,
-			message: "Payment verification failed",
+			message:
+				"Payment verification failed. Please try again or contact support.",
 		});
 	}
 };

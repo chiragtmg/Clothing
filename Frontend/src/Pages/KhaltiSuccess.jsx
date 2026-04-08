@@ -1,73 +1,123 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { apiRequest } from "../Services/API";
 import { useCart } from "../context/CartContext";
-import { toast } from "react-toastify";
-
-// This page is where Khalti sends the user back after payment
-// URL will look like: /khalti-success?pidx=ABC123&status=Completed
 
 const KhaltiSuccess = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
   const { refreshCart } = useCart();
-  const [message, setMessage] = useState("Verifying your payment...");
 
-  useEffect(() => {
-    const verifyPayment = async () => {
-      const pidx = searchParams.get("pidx");
-      const status = searchParams.get("status");
+	const [status, setStatus] = useState("verifying");
+	const [message, setMessage] = useState("Verifying your payment...");
 
-      if (!pidx || status !== "Completed") {
-        setMessage("Payment was cancelled or failed.");
-        setTimeout(() => navigate("/checkout"), 2000);
-        return;
-      }
+	const pidx = searchParams.get("pidx");
+	const hasVerified = useRef(false);
 
-      // Get saved cart and shipping details from localStorage
-      // (we stored them before redirecting to Khalti)
-      const cartItems = JSON.parse(localStorage.getItem("khalti_cart") || "[]");
-      const shippingDetails = JSON.parse(localStorage.getItem("khalti_shipping") || "{}");
-      const totalAmount = localStorage.getItem("khalti_total");
+	useEffect(() => {
+		if (!pidx) {
+			setStatus("error");
+			setMessage("Invalid payment session. No pidx found.");
+			return;
+		}
 
-      try {
-        const res = await apiRequest.post("/khalti/verify", {
-          pidx,
-          cartItems,
-          shippingDetails,
-          totalAmount: Number(totalAmount),
-        });
+		if (hasVerified.current) return;
+		hasVerified.current = true;
 
-        if (res.data.success) {
-          // Clean up localStorage
-          localStorage.removeItem("khalti_cart");
-          localStorage.removeItem("khalti_shipping");
-          localStorage.removeItem("khalti_total");
+		verifyPayment();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [pidx]);
 
-          // Clear cart
-          await apiRequest.delete("/cart/clear");
-          refreshCart();
+	const verifyPayment = async () => {
+		try {
+			const pendingOrderStr = localStorage.getItem("pendingKhaltiOrder");
+			const pendingOrder = pendingOrderStr ? JSON.parse(pendingOrderStr) : {};
 
-          setMessage("Payment successful! Order placed 🎉");
-          toast.success("Order placed successfully!");
-          setTimeout(() => navigate("/myorders"), 2000);
-        }
-      } catch (err) {
-        setMessage("Payment verification failed. Contact support.");
-        toast.error("Verification failed");
-      }
-    };
+			if (!pendingOrder.cartItems?.length) {
+				throw new Error(
+					"Order details missing. Please try again from checkout.",
+				);
+			}
 
-    verifyPayment();
-  }, []);
+			// ✅ Only send pidx (do NOT send cartItems etc.)
+			const { data } = await apiRequest.post("/khalti/verify", {
+				pidx,
+				pendingOrder,
+			});
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
-        <p className="text-2xl font-semibold text-gray-800">{message}</p>
-      </div>
-    </div>
-  );
+			if (data.success) {
+				setStatus("success");
+				setMessage("✅ Payment successful! Order has been placed.");
+
+				localStorage.removeItem("pendingKhaltiOrder");
+				await apiRequest.delete("/cart/clear");
+				refreshCart();
+				setTimeout(() => {
+					navigate("/orders");
+				}, 2500);
+			} else {
+				throw new Error(data.message || "Verification failed");
+			}
+		} catch (error) {
+			console.error("Verify error:", error.response?.data || error.message);
+
+			setStatus("error");
+			setMessage(
+				error.response?.data?.message ||
+					error.message ||
+					"Payment verification failed. Please try again or contact support.",
+			);
+		}
+	};
+
+	return (
+		<div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+			<div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+				{status === "verifying" && (
+					<>
+						<div className="animate-spin w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+						<h2 className="text-xl font-semibold text-gray-800">
+							Verifying Payment...
+						</h2>
+						<p className="text-gray-500 mt-2">{message}</p>
+					</>
+				)}
+
+				{status === "success" && (
+					<>
+						<div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl">
+							✓
+						</div>
+						<h2 className="text-2xl font-bold text-green-600">
+							Payment Successful!
+						</h2>
+						<p className="text-gray-600 mt-3">{message}</p>
+						<p className="text-sm text-gray-500 mt-6">
+							Redirecting to Orders page...
+						</p>
+					</>
+				)}
+
+				{status === "error" && (
+					<>
+						<div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl">
+							✕
+						</div>
+						<h2 className="text-2xl font-bold text-red-600">
+							Verification Failed
+						</h2>
+						<p className="text-gray-600 mt-3">{message}</p>
+						<button
+							onClick={() => navigate("/checkout")}
+							className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+						>
+							Back to Checkout
+						</button>
+					</>
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default KhaltiSuccess;

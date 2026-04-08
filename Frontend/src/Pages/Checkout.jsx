@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../Services/API";
 import { toast } from "react-toastify";
 import { useCart } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";
+import { useContext } from "react";
 
 const Checkout = () => {
+	const { currentUser } = useContext(AuthContext);
 	const navigate = useNavigate();
 	const { refreshCart } = useCart();
-
 	const [cartItems, setCartItems] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [isProcessingEsewa, setIsProcessingEsewa] = useState(false);
@@ -154,14 +156,19 @@ const Checkout = () => {
 		if (!validateForm()) return;
 
 		try {
-			// Save cart + shipping to localStorage BEFORE redirecting
-			// We'll need them again on the success page to create the order
-			localStorage.setItem("khalti_cart", JSON.stringify(cartItems));
-			localStorage.setItem("khalti_shipping", JSON.stringify(formData));
-			localStorage.setItem("khalti_total", total);
+			// ✅ Save everything in ONE key (cleaner & recommended)
+			localStorage.setItem(
+				"pendingKhaltiOrder",
+				JSON.stringify({
+					cartItems,
+					shippingDetails: formData,
+					totalAmount: total,
+					userId: currentUser._id,
+				}),
+			);
 
 			const res = await apiRequest.post("/khalti/initiate", {
-				amount: total, // in NPR (backend will convert to paisa)
+				amount: total, // backend converts to paisa
 				cartItems,
 				shippingDetails: formData,
 			});
