@@ -1,4 +1,4 @@
-import logo from './logo.avif'
+import logo from './logo1.png'
 import search_icon from './search_icon.png'
 import cart from './cart.jpg'
 import profile from './profile.jpg'
