@@ -103,6 +103,7 @@ export const createOrder = async (req, res) => {
     <h2>New Order Alert</h2>
     <p>Customer: ${shippingDetails.firstName}</p>
     <p>Email: ${shippingDetails.email}</p>
+    <p>Phone: ${shippingDetails.phone} </p>
     <p>${shippingDetails.firstName} order has been placed successfully.</p>
     <h3>Order Items:</h3>
     <ul>
