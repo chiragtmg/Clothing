@@ -175,7 +175,7 @@ export const getMyOrders = async (req, res) => {
 		console.error("Error fetching orders:", error);
 		res.status(500).json({
 			success: false,
-			message: "Failed to fetch orders",
+			message: "Failed to fetch Orders",
 		});
 	}
 };

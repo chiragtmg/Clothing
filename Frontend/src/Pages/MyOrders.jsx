@@ -5,12 +5,12 @@ import { toast } from "react-toastify";
 const MyOrders = () => {
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
-	
+
 	// Pagination States
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalOrders, setTotalOrders] = useState(0);
-	
+
 	const ordersPerPage = 5; // You can change this
 
 	useEffect(() => {
@@ -20,8 +20,10 @@ const MyOrders = () => {
 	const fetchOrders = async (page) => {
 		try {
 			setLoading(true);
-			const res = await apiRequest.get(`/order/myorders?page=${page}&limit=${ordersPerPage}`);
-			
+			const res = await apiRequest.get(
+				`/order/myorders?page=${page}&limit=${ordersPerPage}`,
+			);
+
 			setOrders(res.data.orders || []);
 			setTotalPages(res.data.totalPages || 1);
 			setTotalOrders(res.data.totalOrders || 0);
@@ -72,7 +74,10 @@ const MyOrders = () => {
 					<>
 						<div className="space-y-10">
 							{orders.map((order) => (
-								<div key={order._id} className="bg-white rounded-2xl shadow p-8">
+								<div
+									key={order._id}
+									className="bg-white rounded-2xl shadow p-8"
+								>
 									<div className="flex justify-between items-center mb-6 border-b pb-4">
 										<div>
 											<p className="text-sm text-gray-500">Order Date</p>
@@ -104,7 +109,9 @@ const MyOrders = () => {
 													src={getImage(item)}
 													alt={item.name}
 													className="w-24 h-24 object-cover rounded-xl"
-													onError={(e) => (e.target.src = "/placeholder-product.jpg")}
+													onError={(e) =>
+														(e.target.src = "/placeholder-product.jpg")
+													}
 												/>
 
 												<div className="flex-1">
@@ -154,19 +161,21 @@ const MyOrders = () => {
 								</button>
 
 								<div className="flex gap-2">
-									{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-										<button
-											key={page}
-											onClick={() => handlePageChange(page)}
-											className={`w-12 h-12 rounded-xl flex items-center justify-center font-medium transition ${
-												currentPage === page
-													? "bg-black text-white"
-													: "bg-white border border-gray-300 hover:bg-gray-50"
-											}`}
-										>
-											{page}
-										</button>
-									))}
+									{Array.from({ length: totalPages }, (_, i) => i + 1).map(
+										(page) => (
+											<button
+												key={page}
+												onClick={() => handlePageChange(page)}
+												className={`w-12 h-12 rounded-xl flex items-center justify-center font-medium transition ${
+													currentPage === page
+														? "bg-black text-white"
+														: "bg-white border border-gray-300 hover:bg-gray-50"
+												}`}
+											>
+												{page}
+											</button>
+										),
+									)}
 								</div>
 
 								<button
