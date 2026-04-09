@@ -53,7 +53,7 @@ const KhaltiSuccess = () => {
 				await apiRequest.delete("/cart/clear");
 				refreshCart();
 				setTimeout(() => {
-					navigate("/orders");
+					navigate("/myorders");
 				}, 2500);
 			} else {
 				throw new Error(data.message || "Verification failed");

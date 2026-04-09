@@ -9,9 +9,8 @@ const Navbar = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-	console.log(currentUser);
 
-const { cartCount, refreshCart } = useCart();
+	const { cartCount, refreshCart } = useCart();
 	const isActive = (path) => location.pathname === path;
 
 	const handleLogOut = () => {
@@ -22,12 +21,10 @@ const { cartCount, refreshCart } = useCart();
 
 	return (
 		<div className="flex items-center justify-between py-6 font-medium border-b border-gray-200">
-			
 			<Link to="/">
 				<img src={assets.logo} className="w-36" alt="Logo" />
 			</Link>
 
-			
 			<ul className="hidden sm:flex gap-8 text-sm text-gray-700">
 				<li>
 					<Link

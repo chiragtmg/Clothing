@@ -4,6 +4,7 @@ import { apiRequest } from "../Services/API";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../Components/SideBar";
+import { useEffect } from "react";
 
 export default function AddItems() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -12,13 +13,18 @@ export default function AddItems() {
 	const { currentUser } = useContext(AuthContext);
 	const navigate = useNavigate();
 
+	useEffect(() => {
+		if (!currentUser || !currentUser.isAdmin) {
+			navigate("/"); // Redirect non-admins to home
+		}
+	}, [currentUser, navigate]);
 	const [formData, setFormData] = useState({
 		name: "",
 		description: "",
 		category: "Men",
 		subCategory: "Top wear",
 		price: "",
-		variants: [], 
+		variants: [],
 		bestSeller: false,
 	});
 
@@ -70,7 +76,6 @@ export default function AddItems() {
 
 	const isSizeSelected = (size) =>
 		formData.variants.some((v) => v.size === size);
-
 
 	const handleInputChange = (e) => {
 		const { name, value, type, checked } = e.target;

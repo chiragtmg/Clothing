@@ -179,3 +179,76 @@ export const getMyOrders = async (req, res) => {
 		});
 	}
 };
+// controllers/orderController.js
+
+export const getAllOrders = async (req, res) => {
+	try {
+		// Pagination - Same logic as your getMyOrders
+		const page = parseInt(req.query.page) || 1;
+		const limit = parseInt(req.query.limit) || 10;   // 10 orders per page for admin (recommended)
+		const skip = (page - 1) * limit;
+
+		// Get total count
+		const totalOrders = await Order.countDocuments();
+
+		// Fetch orders with pagination
+		const orders = await Order.find()
+			.sort({ createdAt: -1 })
+			.skip(skip)
+			.limit(limit)
+			.populate('user', 'name email')           // Show customer info
+			.populate({
+				path: 'items.productId',
+				select: 'name images image'           // Important for images
+			});
+
+		const totalPages = Math.ceil(totalOrders / limit);
+
+		res.status(200).json({
+			success: true,
+			orders,
+			currentPage: page,
+			totalPages,
+			totalOrders,
+			hasNextPage: page < totalPages,
+			hasPrevPage: page > 1,
+		});
+	} catch (error) {
+		console.error("Error fetching all orders:", error);
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch orders",
+		});
+	}
+};
+
+// Update Order Status
+export const updateOrderStatus = async (req, res) => {
+	try {
+		const { orderId } = req.params;
+		const { status } = req.body;
+
+		if (!["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].includes(status)) {
+			return res.status(400).json({ success: false, message: "Invalid status" });
+		}
+
+		const order = await Order.findByIdAndUpdate(
+			orderId,
+			{ status },
+			{ new: true }
+		);
+
+		if (!order) {
+			return res.status(404).json({ success: false, message: "Order not found" });
+		}
+
+		res.status(200).json({
+			success: true,
+			message: "Order status updated successfully",
+			order,
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ success: false, message: "Failed to update status" });
+	}
+};

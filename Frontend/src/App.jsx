@@ -16,18 +16,18 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import Dashboard from "./Pages/Dashboard";
 import AddItems from "./Pages/AddItems";
 import ListItems from "./Pages/ListItems";
-import Order from "./Pages/Order";
 import EditProduct from "./Pages/EditProduct";
 import Search from "./Pages/Search";
 import Checkout from "./Pages/Checkout";
 import MyOrders from "./Pages/MyOrders";
 import PaymentSuccess from "./Pages/PaymentSuccess";
 import KhaltiSuccess from "./Pages/KhaltiSuccess";
+import AdminOrders from "./Pages/AdminOrders";
 
 const App = () => {
 	const GoogleAuthWrapper = () => {
 		return (
-			<GoogleOAuthProvider clientId="845839277034-ntjf56hk9g1gskf7ihhps2jlta5gdes9.apps.googleusercontent.com">
+			<GoogleOAuthProvider clientId="845839277034-358drmar18k7deaes6i96glon4bfn6pr.apps.googleusercontent.com">
 				<Login></Login>
 			</GoogleOAuthProvider>
 		);
@@ -58,7 +58,7 @@ const App = () => {
 				<Route path="/addItem" element={<AddItems />} />
 				<Route path="/listItem" element={<ListItems />} />
 				<Route path="/editProduct/:id" element={<EditProduct />} />
-				<Route path="/order" element={<Order />} />
+				<Route path="/adminorders" element={<AdminOrders />} />
 			</Routes>
 
 			<Footer />

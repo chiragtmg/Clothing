@@ -14,6 +14,10 @@ const googleAuth = async (req, res) => {
 	try {
 		const { code } = req.body;
 
+		// console.log("Received code:", code);
+		// console.log("Client ID:", process.env.GOOGLE_CLIENT_ID);
+		// console.log("Redirect URI:", process.env.GOOGLE_REDIRECT_URI);
+
 		if (!code) {
 			return res.status(400).json({ message: "Code is required" });
 		}
@@ -119,7 +123,7 @@ const loginUser = async (req, res) => {
 			username: user.username,
 			email: user.email,
 			avatar: user.avatar,
-			role: user.role, 
+			role: user.role,
 			createdAt: user.createdAt,
 			updatedAt: user.updatedAt,
 		};

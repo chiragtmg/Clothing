@@ -1,6 +1,6 @@
 // pages/PaymentSuccess.jsx
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiRequest } from "../Services/API";
 import { toast } from "react-toastify";
 import { useCart } from "../context/CartContext";
@@ -8,6 +8,7 @@ import { useCart } from "../context/CartContext";
 const PaymentSuccess = () => {
 	const { refreshCart } = useCart();
 	const location = useLocation();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const verify = async () => {
@@ -36,6 +37,9 @@ const PaymentSuccess = () => {
 					// Clear cart
 					await apiRequest.delete("/cart/clear");
 					refreshCart();
+					setTimeout(() => {
+						navigate("/myorders");
+					}, 2500);
 
 					toast.success("Payment Successful 🎉");
 				} else {
