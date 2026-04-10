@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest, imgBaseURL } from "../Services/API";
 import { toast } from "react-toastify"; // ← assuming you have react-toastify installed
 import { useCart } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";
 
 const Product = () => {
 	const { id } = useParams();
@@ -17,6 +18,7 @@ const Product = () => {
 	const [addingToCart, setAddingToCart] = useState(false); // ← new: button loading state
 	const [error, setError] = useState("");
 	const { refreshCart } = useCart();
+	const { currentUser } = useContext(AuthContext);
 
 	useEffect(() => {
 		const fetchProduct = async () => {
@@ -91,6 +93,10 @@ const Product = () => {
 	const stockStatus = getStockStatus(stock);
 
 	const handleAddToCart = async () => {
+		if (!currentUser) {
+			navigate("/login");
+			return;
+		}
 		if (stock === 0) return;
 
 		setAddingToCart(true);

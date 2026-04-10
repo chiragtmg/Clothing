@@ -1,9 +1,10 @@
 // src/pages/Cart.jsx
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { imgBaseURL, apiRequest } from "../Services/API";
 import { toast } from "react-toastify";
 import { useCart } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";
 
 const Cart = () => {
 	const [cartItems, setCartItems] = useState([]);
@@ -12,10 +13,15 @@ const Cart = () => {
 	const [error, setError] = useState(null);
 	const { refreshCart } = useCart();
 	const navigate = useNavigate();
+	const {currentUser} = useContext(AuthContext);
 
 	// Fetch cart on mount
 	useEffect(() => {
 		const fetchCart = async () => {
+			if (!currentUser) {
+				navigate("/");
+				return;
+			}
 			try {
 				setLoading(true);
 				const res = await apiRequest.get("/cart");
