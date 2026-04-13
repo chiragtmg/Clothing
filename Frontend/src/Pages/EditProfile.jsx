@@ -3,9 +3,14 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { apiRequest } from "../Services/API";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const EditProfile = () => {
 	const { updateUser, currentUser } = useContext(AuthContext);
+	const [selectedFile, setSelectedFile] = useState(null);
+	const [previewUrl, setPreviewUrl] = useState(
+		getImageUrl(currentUser?.avatar),
+	);
 	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		username: currentUser?.username || "",
@@ -24,17 +29,46 @@ const EditProfile = () => {
 		}));
 	};
 
+	const handleImageChange = (e) => {
+		const file = e.target.files[0];
+
+		if (!file) return;
+
+		if (file.size > 5 * 1024 * 1024) {
+			setError("Image must be less than 5MB");
+			return;
+		}
+
+		setSelectedFile(file);
+		setPreviewUrl(URL.createObjectURL(file));
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
 		setError("");
 
 		try {
+			const submitData = new FormData();
+
+			submitData.append("username", formData.username);
+			submitData.append("email", formData.email);
+
+			if (selectedFile) {
+				submitData.append("avatar", selectedFile);
+			}
+
 			const res = await apiRequest.put(
 				`/user/edit/${currentUser._id}`,
-				formData,
-			); //sending id as parameter using put method
-			updateUser(res.data.data); // sending data for updating so we dont need to logout to updated data
+				submitData,
+				{
+					headers: {
+						Authorization: `Bearer ${currentUser?.token}`,
+					},
+				},
+			);
+
+			updateUser(res.data.data);
 			navigate("/");
 		} catch (error) {
 			setError(error.response?.data?.msg || "Something went wrong");
@@ -102,22 +136,23 @@ const EditProfile = () => {
 						</div>
 
 						<div>
-							<label
-								htmlFor="avatar"
-								className="block text-sm font-medium text-gray-700 mb-1"
-							>
-								Avatar
+							<label className="block text-sm font-medium text-gray-700 mb-2">
+								Profile Image
 							</label>
+
+							{previewUrl && (
+								<img
+									src={previewUrl}
+									alt="Preview"
+									className="w-24 h-24 rounded-full object-cover mb-3 border"
+								/>
+							)}
+
 							<input
-								id="avatar"
-								type="text"
-								name="avatar"
-								value={formData.avatar}
-								onChange={handleChange}
-								className="block w-full px-4 py-3 rounded-lg border border-gray-300 
-                           placeholder:text-gray-400 
-                           focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 
-                           outline-none transition-all duration-200"
+								type="file"
+								accept="image/*"
+								onChange={handleImageChange}
+								className="block w-full text-sm text-gray-500"
 							/>
 						</div>
 					</div>

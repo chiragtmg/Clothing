@@ -3,12 +3,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext, useCart } from "../context/CartContext";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const Navbar = () => {
 	const { currentUser, logout } = useContext(AuthContext);
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+	const avatarUrl = getImageUrl(currentUser?.avatar);
 
 	const { cartCount, refreshCart } = useCart();
 	const isActive = (path) => location.pathname === path;
@@ -110,7 +112,7 @@ const Navbar = () => {
 						>
 							{currentUser?.avatar ? (
 								<img
-									src={currentUser.avatar}
+									src={avatarUrl}
 									className="w-9 h-9 rounded-full object-cover cursor-pointer border"
 									alt="Profile"
 								/>
