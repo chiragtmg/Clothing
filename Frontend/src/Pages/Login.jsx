@@ -14,10 +14,14 @@ const Login = () => {
 	const { updateUser, currentUser } = useContext(AuthContext);
 
 	useEffect(() => {
-		if (currentUser) {
+	if (currentUser) {
+		if (currentUser.role === "admin") {
+			navigate("/admindashboard");
+		} else {
 			navigate("/");
 		}
-	}, [currentUser]);
+	}
+}, [currentUser]);
 
 	const responseGoogle = async (authResult) => {
 		setIsLoading(true);
@@ -28,16 +32,30 @@ const Login = () => {
 
 			const result = await googleAuth(authResult.code);
 
-			// Backend now returns user directly (no token, no user object wrapper)
-			const { _id, email, username, avatar } = result.data;
+			console.log("🔍 Google Response from Backend:", result.data); // ← Debug
 
-			const userObj = { _id, email, username, avatar };
+			// FIXED: Include role properly
+			const userObj = {
+				_id: result.data._id,
+				username: result.data.username,
+				email: result.data.email,
+				avatar: result.data.avatar,
+				role: result.data.role || "customer", // ← This was missing
+			};
+
+			console.log("✅ Saving user with role:", userObj.role);
 
 			updateUser(userObj);
 			toast.success("Login successfully");
-			navigate("/");
+
+			// Redirect based on role
+			if (userObj.role === "admin") {
+				navigate("/admin/orders"); // or "/dashboard" if you prefer
+			} else {
+				navigate("/");
+			}
 		} catch (e) {
-			console.log("Error while Google Login...", e);
+			console.error("Error while Google Login...", e);
 			toast.error("Google login failed");
 		} finally {
 			setIsLoading(false);
@@ -62,11 +80,12 @@ const Login = () => {
 				{ withCredentials: true }, // IMPORTANT
 			);
 
-			updateUser(response.data);
+			
 			toast.success("Login successfully");
 			const user = response.data.user || response.data;
+			updateUser(response.data);
 			if (user.role === "admin") {
-				navigate("/dashboard");
+				navigate("/admindashboard");
 			} else {
 				navigate("/");
 			}

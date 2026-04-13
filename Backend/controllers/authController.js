@@ -1,149 +1,136 @@
-import { response } from "express";
-import validator from "validator";
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import validator from "validator";
 import oauth2Client from "../utils/googleConfig.js";
 import axios from "axios";
 
-const createToken = (id) => {
-	return jwt.sign({ id }, process.env.JWT_SECRET);
+// Helper to create JWT with role
+export const createToken = (user) => {
+	return jwt.sign(
+		{
+			id: user._id,
+			username: user.username,
+			email: user.email,
+			avatar: user.avatar,
+			role: user.role,
+		},
+		process.env.JWT_SECRET_KEY,
+		{ expiresIn: "7d" },
+	);
 };
 
-const googleAuth = async (req, res) => {
-	try {
-		const { code } = req.body;
+export const googleAuth = async (req, res) => {
+  try {
+    const { code } = req.body;
+    console.log("✅ Google Auth Started - Email will be:", req.body.email); // for safety
 
-		// console.log("Received code:", code);
-		// console.log("Client ID:", process.env.GOOGLE_CLIENT_ID);
-		// console.log("Redirect URI:", process.env.GOOGLE_REDIRECT_URI);
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
 
-		if (!code) {
-			return res.status(400).json({ message: "Code is required" });
-		}
+    const userRes = await axios.get(
+      "https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
+      { headers: { Authorization: `Bearer ${tokens.access_token}` } }
+    );
 
-		// Exchange authorization code for tokens
-		const { tokens } = await oauth2Client.getToken(code);
-		oauth2Client.setCredentials(tokens);
+    const { email, name, picture } = userRes.data;
+    console.log("📧 Google User Email:", email);
 
-		// Get user info from Google
-		const userRes = await axios.get(
-			"https://www.googleapis.com/oauth2/v1/userinfo?alt=json",
-			{
-				headers: {
-					Authorization: `Bearer ${tokens.access_token}`,
-				},
-			},
-		);
+    let user = await userModel.findOne({ email });
 
-		const { email, name, picture } = userRes.data;
+    if (!user) {
+      console.log("🆕 Creating new user...");
+      user = await userModel.create({
+        username: name,
+        email,
+        avatar: picture,
+        role: email === "chiragtmg456@gmail.com" ? "admin" : "customer",
+      });
+    } else if (email === "chiragtmg456@gmail.com" && user.role !== "admin") {
+      console.log("🔧 Upgrading user to admin...");
+      user.role = "admin";
+      await user.save();
+    }
 
-		// Find or create user
-		let user = await userModel.findOne({ email });
+    console.log("👤 Final User Role before sending:", user.role);
 
-		if (!user) {
-			user = await userModel.create({
-				username: name,
-				email,
-				avatar: picture,
-			});
-		}
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role,
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "7d" }
+    );
 
-		// Generate JWT
-		const age = 1000 * 60 * 60 * 24 * 7; // 7 days
+    res.cookie("token", token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 7 });
 
-		const token = jwt.sign(
-			{
-				id: user._id,
-				username: user.username,
-				avatar: user.avatar,
-				isAdmin: false,
-			},
-			process.env.JWT_SECRET_KEY,
-			{ expiresIn: "7d" },
-		);
+    const responseData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+    };
 
-		// Set cookie (IMPORTANT FIX)
-		res
-			.cookie("token", token, {
-				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "strict",
-				maxAge: age,
-			})
-			.status(200)
-			.json({
-				_id: user._id,
-				username: user.username,
-				email: user.email,
-				avatar: user.avatar,
-			});
-	} catch (err) {
-		console.error("Google Auth Error:", err);
-		res.status(500).json({
-			message: "Google login failed",
-			error: err.message,
-		});
-	}
+    console.log("📤 Sending to frontend:", responseData);   // ← Most Important Log
+
+    res.status(200).json(responseData);
+  } catch (err) {
+    console.error("❌ Google Auth Error:", err);
+    res.status(500).json({ message: "Google login failed" });
+  }
 };
 
-// Route for the user login
-const loginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
 	const { email, password } = req.body;
+
 	try {
 		const user = await userModel.findOne({ email });
-
 		if (!user) {
 			return res
 				.status(401)
-				.json({ success: false, message: "User doesnot exist" });
+				.json({ success: false, message: "User does not exist" });
 		}
 
 		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
-			return res.status(401).json({ msg: "Invalid credentials" });
+			return res
+				.status(401)
+				.json({ success: false, message: "Invalid credentials" });
 		}
-		// Generate JWT token
-		const age = 1000 * 60 * 60 * 24 * 7; // 1 week
 
-		const token = jwt.sign(
-			{
-				id: user._id,
-				username: user.username,
-				avatar: user.avatar,
-				isAdmin: false,
-			},
-			process.env.JWT_SECRET_KEY,
-			{ expiresIn: age },
-		);
+		// Auto admin for your email
+		if (email === "chiragtmg456@gmail.com" && user.role !== "admin") {
+			user.role = "admin";
+			await user.save();
+		}
 
-		// Create user info object
-		const userInfo = {
+		const token = createToken(user);
+
+		res.cookie("token", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production",
+			maxAge: 1000 * 60 * 60 * 24 * 7,
+		});
+
+		res.status(200).json({
 			_id: user._id,
 			username: user.username,
 			email: user.email,
 			avatar: user.avatar,
 			role: user.role,
-			createdAt: user.createdAt,
-			updatedAt: user.updatedAt,
-		};
-
-		res
-			.cookie("token", token, {
-				httpOnly: true,
-				// secure: true, // uncomment in production with HTTPS
-				maxAge: age,
-			})
-			.status(200)
-			.json(userInfo);
+		});
 	} catch (error) {
-		res.status(500).json({ msg: "Internal server error" });
 		console.error(error);
+		res.status(500).json({ success: false, message: "Internal server error" });
 	}
 };
 
-//route for the user registration
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
 	const { username, email, password } = req.body;
 
 	try {
@@ -198,6 +185,4 @@ export const logoutUser = (req, res) => {
 };
 
 //route for admin login
-const adminLogin = async (req, res) => {};
-
-export { loginUser, registerUser, adminLogin, googleAuth };
+export const adminLogin = async (req, res) => {};

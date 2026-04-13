@@ -1,10 +1,11 @@
 // AddProduct.jsx
 import { useContext, useState } from "react";
 import { apiRequest } from "../Services/API";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext, useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../Components/SideBar";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 export default function AddItems() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -12,12 +13,23 @@ export default function AddItems() {
 	const [success, setSuccess] = useState("");
 	const { currentUser } = useContext(AuthContext);
 	const navigate = useNavigate();
+	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth(); // ← Destructure here
 
 	useEffect(() => {
-		if (!currentUser || !currentUser.isAdmin) {
-			navigate("/"); // Redirect non-admins to home
+		if (authLoading) return; // Wait until auth is loaded
+
+		if (!isLoggedIn) {
+			toast.error("Please login first");
+			navigate("/login");
+			return;
 		}
-	}, [currentUser, navigate]);
+
+		if (!isAdmin) {
+			toast.error("Access denied. Admin only.");
+			navigate("/");
+			return;
+		}
+	}, [isLoggedIn, isAdmin, authLoading, navigate]);
 	const [formData, setFormData] = useState({
 		name: "",
 		description: "",

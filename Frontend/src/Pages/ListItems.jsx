@@ -4,34 +4,48 @@ import { useNavigate } from "react-router-dom"; // ← add this
 import SideBar from "../Components/SideBar";
 import { apiRequest, imgBaseURL } from "../Services/API";
 import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
 
 export default function ListItems() {
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
-
 	const navigate = useNavigate();
+	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth();
 
 	useEffect(() => {
-		const fetchProducts = async () => {
-			try {
-				setLoading(true);
-				setError(null);
+		if (authLoading) return; // Wait until auth is loaded
 
-				const response = await apiRequest.get("/product/get/product");
-				const productsArray = response.data?.data || [];
+		if (!isLoggedIn) {
+			toast.error("Please login first");
+			navigate("/login");
+			return;
+		}
 
-				setProducts(Array.isArray(productsArray) ? productsArray : []);
-			} catch (err) {
-				console.error("Failed to fetch products:", err);
-				setError("Failed to load products. Please try again later.");
-			} finally {
-				setLoading(false);
-			}
-		};
-
+		if (!isAdmin) {
+			toast.error("Access denied. Admin only.");
+			navigate("/");
+			return;
+		}
 		fetchProducts();
-	}, []);
+	}, [isLoggedIn, isAdmin, authLoading, navigate]);
+
+	const fetchProducts = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			const response = await apiRequest.get("/product/get/product");
+			const productsArray = response.data?.data || [];
+
+			setProducts(Array.isArray(productsArray) ? productsArray : []);
+		} catch (err) {
+			console.error("Failed to fetch products:", err);
+			setError("Failed to load products. Please try again later.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const getImageUrl = (product) => {
 		if (product.images && product.images.length > 0) {

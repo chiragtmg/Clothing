@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { apiRequest, imgBaseURL } from "../Services/API";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
+import SideBar from "../Components/SideBar";   // ← Added Sidebar
 
 const AdminOrders = () => {
 	const [orders, setOrders] = useState([]);
@@ -12,18 +12,30 @@ const AdminOrders = () => {
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalOrders, setTotalOrders] = useState(0);
 	const [updatingId, setUpdatingId] = useState(null);
+
 	const navigate = useNavigate();
-	const currentUser = useContext(AuthContext);
+	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth();
 
 	const limit = 10;
 
+	// Admin Protection
 	useEffect(() => {
-		if (!currentUser || !currentUser.isAdmin) {
+		if (authLoading) return;
+
+		if (!isLoggedIn) {
+			toast.error("Please login first");
+			navigate("/login");
+			return;
+		}
+
+		if (!isAdmin) {
+			toast.error("Access denied. Admin only.");
 			navigate("/");
 			return;
 		}
+
 		fetchOrders(currentPage);
-	}, [currentUser, currentPage]);
+	}, [isLoggedIn, isAdmin, authLoading, currentPage, navigate]);
 
 	const fetchOrders = async (page) => {
 		try {
@@ -36,9 +48,11 @@ const AdminOrders = () => {
 			setTotalPages(res.data.totalPages || 1);
 			setTotalOrders(res.data.totalOrders || 0);
 		} catch (err) {
-			if (err.response?.status === 401) {
+			if (err.response?.status === 401 || err.response?.status === 403) {
 				toast.error("Admin access required");
 				navigate("/");
+			} else {
+				toast.error("Failed to load orders");
 			}
 		} finally {
 			setLoading(false);
@@ -66,16 +80,13 @@ const AdminOrders = () => {
 		}
 	};
 
-	// ✅ Correct getImage for your schema
 	const getImage = (item) => {
-		if (!item) return "/placeholder-product.jpg";
+		if (!item) return `${imgBaseURL}/placeholder-product.jpg`;
 
-		// 1. Use image saved directly in order item (most reliable)
 		if (item.image) {
 			return `${imgBaseURL}${item.image}`;
 		}
 
-		// 2. Fallback: Try populated product
 		if (item.productId) {
 			if (item.productId.images?.length > 0) {
 				return `${imgBaseURL}${item.productId.images[0]}`;
@@ -85,7 +96,7 @@ const AdminOrders = () => {
 			}
 		}
 
-		return "/placeholder-product.jpg";
+		return `${imgBaseURL}/placeholder-product.jpg`;
 	};
 
 	const statusOptions = [
@@ -104,143 +115,155 @@ const AdminOrders = () => {
 		Cancelled: "bg-red-100 text-red-700",
 	};
 
+	if (loading && orders.length === 0) {
+		return (
+			<div className="min-h-screen bg-gray-100 flex items-center justify-center">
+				<div className="text-lg text-gray-600">Loading orders...</div>
+			</div>
+		);
+	}
+
 	return (
-		<div className="p-8 bg-gray-50 min-h-screen">
-			<div className="max-w-7xl mx-auto">
-				<div className="flex justify-between items-center mb-8">
-					<h1 className="text-4xl font-bold">All Customer Orders</h1>
-					<p className="text-gray-600">
-						Total Orders: <span className="font-semibold">{totalOrders}</span>
-					</p>
-				</div>
+		<div className="min-h-screen bg-gray-100">
+			<div className="grid grid-cols-1 md:grid-cols-[240px_1fr]">
+				<SideBar />
 
-				{loading && orders.length === 0 ? (
-					<div className="text-center py-20 text-xl">Loading orders...</div>
-				) : (
-					<>
-						<div className="bg-white rounded-2xl shadow overflow-hidden">
-							{orders.map((order) => (
-								<div
-									key={order._id}
-									className="p-6 border-b last:border-b-0 hover:bg-gray-50"
-								>
-									<div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-										<div>
-											<p className="text-sm text-gray-500">
-												Order ID: {order._id}
-											</p>
-											<p className="font-medium mt-1">
-												{new Date(order.createdAt).toLocaleDateString("en-US", {
-													year: "numeric",
-													month: "long",
-													day: "numeric",
-												})}
-											</p>
-											{order.user && (
-												<p className="text-sm text-gray-600 mt-1">
-													Customer: {order.user.name || order.user.email}
-												</p>
-											)}
-										</div>
+				<main className="p-6 md:p-8">
+					<div className="flex items-center justify-between mb-8">
+						<h1 className="text-3xl font-bold text-gray-900">
+							All Customer Orders
+						</h1>
+						<p className="text-gray-600">
+							Total Orders: <span className="font-semibold">{totalOrders}</span>
+						</p>
+					</div>
 
-										<select
-											value={order.status}
-											onChange={(e) =>
-												handleStatusChange(order._id, e.target.value)
-											}
-											disabled={updatingId === order._id}
-											className={`px-5 py-3 rounded-2xl text-sm font-semibold border-0 focus:ring-2 focus:ring-black ${
-												statusColors[order.status]
-											}`}
-										>
-											{statusOptions.map((s) => (
-												<option key={s} value={s}>
-													{s}
-												</option>
-											))}
-										</select>
+					<div className="bg-white rounded-2xl shadow overflow-hidden">
+						{orders.map((order) => (
+							<div
+								key={order._id}
+								className="p-6 border-b last:border-b-0 hover:bg-gray-50"
+							>
+								<div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+									<div>
+										<p className="text-sm text-gray-500">
+											Order ID: {order._id}
+										</p>
+										<p className="font-medium mt-1">
+											{new Date(order.createdAt).toLocaleDateString("en-US", {
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											})}
+										</p>
+										{order.user && (
+											<p className="text-sm text-gray-600 mt-1">
+												Customer: {order.user.name || order.user.email}
+											</p>
+										)}
 									</div>
 
-									{/* Items */}
-									<div className="space-y-5">
-										{order.items.map((item, index) => (
-											<div key={index} className="flex gap-6 items-center">
-												<img
-													src={getImage(item)}
-													alt={item.name}
-													className="w-20 h-20 object-cover rounded-xl border"
-													onError={(e) => {
-														e.target.onerror = null;
-														e.target.src = "/placeholder-product.jpg";
-													}}
-												/>
-												<div className="flex-1">
-													<h4 className="font-semibold text-lg">{item.name}</h4>
-													<p className="text-gray-600">
-														NPR {item.price} × {item.quantity}
-													</p>
-													{item.size && item.size !== "N/A" && (
-														<p className="text-sm text-gray-500">
-															Size: {item.size}
-														</p>
-													)}
-												</div>
-												<div className="font-semibold text-right">
-													NPR {(item.price * item.quantity).toFixed(0)}
-												</div>
-											</div>
+									<select
+										value={order.status}
+										onChange={(e) =>
+											handleStatusChange(order._id, e.target.value)
+										}
+										disabled={updatingId === order._id}
+										className={`px-5 py-3 rounded-2xl text-sm font-semibold border-0 focus:ring-2 focus:ring-black ${
+											statusColors[order.status]
+										}`}
+									>
+										{statusOptions.map((s) => (
+											<option key={s} value={s}>
+												{s}
+											</option>
 										))}
-									</div>
-
-									{/* Total */}
-									<div className="mt-8 pt-6 border-t flex justify-between text-xl font-bold">
-										<span>Total Amount</span>
-										<span>NPR {order.totalAmount}</span>
-									</div>
+									</select>
 								</div>
-							))}
-						</div>
 
-						{/* Pagination */}
-						{totalPages > 1 && (
-							<div className="flex justify-center gap-4 mt-12">
-								<button
-									onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-									disabled={currentPage === 1}
-									className="px-6 py-3 bg-white border rounded-xl hover:bg-gray-50 disabled:opacity-50"
-								>
-									← Previous
-								</button>
+								{/* Items */}
+								<div className="space-y-5">
+									{order.items.map((item, index) => (
+										<div key={index} className="flex gap-6 items-center">
+											<img
+												src={getImage(item)}
+												alt={item.name}
+												className="w-20 h-20 object-cover rounded-xl border"
+												onError={(e) => {
+													e.target.onerror = null;
+													e.target.src = `${imgBaseURL}/placeholder-product.jpg`;
+												}}
+											/>
+											<div className="flex-1">
+												<h4 className="font-semibold text-lg">{item.name}</h4>
+												<p className="text-gray-600">
+													NPR {item.price} × {item.quantity}
+												</p>
+												{item.size && item.size !== "N/A" && (
+													<p className="text-sm text-gray-500">
+														Size: {item.size}
+													</p>
+												)}
+											</div>
+											<div className="font-semibold text-right">
+												NPR {(item.price * item.quantity).toFixed(0)}
+											</div>
+										</div>
+									))}
+								</div>
 
-								{Array.from({ length: totalPages }, (_, i) => i + 1).map(
-									(page) => (
-										<button
-											key={page}
-											onClick={() => setCurrentPage(page)}
-											className={`w-12 h-12 rounded-2xl font-medium ${
-												currentPage === page
-													? "bg-black text-white"
-													: "bg-white border hover:bg-gray-50"
-											}`}
-										>
-											{page}
-										</button>
-									),
-								)}
-
-								<button
-									onClick={() =>
-										setCurrentPage((p) => Math.min(totalPages, p + 1))
-									}
-									disabled={currentPage === totalPages}
-									className="px-6 py-3 bg-white border rounded-xl hover:bg-gray-50 disabled:opacity-50"
-								>
-									Next →
-								</button>
+								{/* Total */}
+								<div className="mt-8 pt-6 border-t flex justify-between text-xl font-bold">
+									<span>Total Amount</span>
+									<span>NPR {order.totalAmount}</span>
+								</div>
 							</div>
-						)}
-					</>
-				)}
+						))}
+					</div>
+
+					{/* Pagination */}
+					{totalPages > 1 && (
+						<div className="flex justify-center gap-4 mt-12">
+							<button
+								onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+								disabled={currentPage === 1}
+								className="px-6 py-3 bg-white border rounded-xl hover:bg-gray-50 disabled:opacity-50"
+							>
+								← Previous
+							</button>
+
+							{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+								<button
+									key={page}
+									onClick={() => setCurrentPage(page)}
+									className={`w-12 h-12 rounded-2xl font-medium ${
+										currentPage === page
+											? "bg-black text-white"
+											: "bg-white border hover:bg-gray-50"
+									}`}
+								>
+									{page}
+								</button>
+							))}
+
+							<button
+								onClick={() =>
+									setCurrentPage((p) => Math.min(totalPages, p + 1))
+								}
+								disabled={currentPage === totalPages}
+								className="px-6 py-3 bg-white border rounded-xl hover:bg-gray-50 disabled:opacity-50"
+							>
+								Next →
+							</button>
+						</div>
+					)}
+
+					{orders.length === 0 && !loading && (
+						<div className="text-center py-12 text-gray-500">
+							No orders found.
+						</div>
+					)}
+				</main>
 			</div>
 		</div>
 	);

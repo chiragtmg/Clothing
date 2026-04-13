@@ -10,6 +10,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js"
 import paymentRoutes from "./routes/payementRoutes.js"
 import khaltiRoutes from "./routes/khaltiRoutes.js"
+import analyticRoutes from "./routes/analyticRoutes.js"
 
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -42,6 +43,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api", paymentRoutes)
 app.use("/api", khaltiRoutes)
+app.use("/api", analyticRoutes)
 
 app.get("/", (req, res) => {
 	res.send("API WOrking");

@@ -185,7 +185,7 @@ export const getAllOrders = async (req, res) => {
 	try {
 		// Pagination - Same logic as your getMyOrders
 		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10;   // 10 orders per page for admin (recommended)
+		const limit = parseInt(req.query.limit) || 10; // 10 orders per page for admin (recommended)
 		const skip = (page - 1) * limit;
 
 		// Get total count
@@ -196,10 +196,10 @@ export const getAllOrders = async (req, res) => {
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit)
-			.populate('user', 'name email')           // Show customer info
+			.populate("user", "name email") // Show customer info
 			.populate({
-				path: 'items.productId',
-				select: 'name images image'           // Important for images
+				path: "items.productId",
+				select: "name images image", // Important for images
 			});
 
 		const totalPages = Math.ceil(totalOrders / limit);
@@ -228,18 +228,26 @@ export const updateOrderStatus = async (req, res) => {
 		const { orderId } = req.params;
 		const { status } = req.body;
 
-		if (!["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].includes(status)) {
-			return res.status(400).json({ success: false, message: "Invalid status" });
+		if (
+			!["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].includes(
+				status,
+			)
+		) {
+			return res
+				.status(400)
+				.json({ success: false, message: "Invalid status" });
 		}
 
 		const order = await Order.findByIdAndUpdate(
 			orderId,
 			{ status },
-			{ new: true }
+			{ new: true },
 		);
 
 		if (!order) {
-			return res.status(404).json({ success: false, message: "Order not found" });
+			return res
+				.status(404)
+				.json({ success: false, message: "Order not found" });
 		}
 
 		res.status(200).json({
@@ -249,6 +257,10 @@ export const updateOrderStatus = async (req, res) => {
 		});
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({ success: false, message: "Failed to update status" });
+		res
+			.status(500)
+			.json({ success: false, message: "Failed to update status" });
 	}
 };
+
+

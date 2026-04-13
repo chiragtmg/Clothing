@@ -13,6 +13,16 @@ const Sidebar = () => {
       </div>
       <nav className="flex-1 px-3 py-6 flex flex-col space-y-1">
         <Link
+          to="/admindashboard"
+          className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+            isActive("/admindashboard")
+              ? "bg-indigo-600 text-white"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
+        >
+          Admin Dashboard
+        </Link>
+        <Link
           to="/addItem"
           className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
             isActive("/addItem")
@@ -35,7 +45,7 @@ const Sidebar = () => {
         </Link>
 
         <Link
-          to="/order"
+          to="/adminorders"
           className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
             isActive("/order")
               ? "bg-indigo-600 text-white"

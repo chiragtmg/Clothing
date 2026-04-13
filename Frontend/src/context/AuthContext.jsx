@@ -1,66 +1,78 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { apiRequest } from "../Services/API";
 
 export const AuthContext = createContext(null);
 
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthContextProvider");
+  }
+  return context;
+};
+
 export const AuthContextProvider = ({ children }) => {
-	const [currentUser, setCurrentUser] = useState(
-		JSON.parse(localStorage.getItem("user")) || null
-	);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-	const [loading, setLoading] = useState(true);
+  // Load from localStorage on app start
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        console.log("🔄 Loaded user from localStorage:", user);   // Debug
+        setCurrentUser(user);
+      } catch (e) {
+        console.error("Failed to parse user from localStorage");
+        localStorage.removeItem("user");
+      }
+    }
+    setLoading(false);
+  }, []);
 
-	// Update user and save to localStorage
-	const updateUser = (data) => {
-		setCurrentUser(data);
-		localStorage.setItem("user", JSON.stringify(data));
-	};
+  const updateUser = (data) => {
+    console.log("💾 updateUser called with:", data);   // Debug
 
-	const logout = async () => {
-		try {
-			await apiRequest.post("/auth/logout");
-		} catch (error) {
-			console.error("Logout error:", error);
-		} finally {
-			setCurrentUser(null);
-			localStorage.removeItem("user");
-		}
-	};
+    if (!data) return;
 
-	// Check if user is logged in on app start
-	// useEffect(() => {
-	// 	const checkAuth = async () => {
-	// 		try {
-	// 			if (currentUser) {
-	// 				// Optional: Verify token with backend if needed
-	// 				await apiRequest.get("/auth/me");   // You can create this endpoint later
-	// 			}
-	// 		} catch (err) {
-	// 			// Token invalid or expired
-	// 			setCurrentUser(null);
-	// 			localStorage.removeItem("user");
-	// 		} finally {
-	// 			setLoading(false);
-	// 		}
-	// 	};
+    const userData = {
+      _id: data._id,
+      username: data.username,
+      email: data.email,
+      avatar: data.avatar,
+      role: data.role || "customer",        // ← Force role fallback
+    };
 
-	// 	checkAuth();
-	// }, []);
-	useEffect(() => {
-		localStorage.setItem("user", JSON.stringify(currentUser));
-	}, [currentUser]);
+    console.log("✅ Saving to localStorage with role:", userData.role);
 
-	return (
-		<AuthContext.Provider
-			value={{
-				currentUser,
-				updateUser,
-				logout,
-				loading,
-				isLoggedIn: !!currentUser,
-			}}
-		>
-			{children}
-		</AuthContext.Provider>
-	);
+    setCurrentUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+  };
+
+  const logout = async () => {
+    try {
+      await apiRequest.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setCurrentUser(null);
+      localStorage.removeItem("user");
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        updateUser,
+        logout,
+        loading,
+        isLoggedIn: !!currentUser,
+        isAdmin: currentUser?.role === "admin",
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
 		role: { type: String, enum: ["customer", "admin"], default: "customer" },
 		cartData: { type: Object, default: {} },
 	},
-	{ minimze: false },
+	{ minimize: false },
 	{
 		timestamps: true, // helps to identify create and update time in mongo db
 	},
