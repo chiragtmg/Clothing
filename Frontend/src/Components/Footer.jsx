@@ -69,11 +69,11 @@ const Footer = () => {
 							</li>
 							<li className="flex items-center">
 								<span className="mr-3">✉️</span>
-								<span>company@gmail.com</span>
+								<span>ashishit@gmail.com</span>
 							</li>
 							<li className="flex items-start">
 								<span className="mr-3 mt-1">📍</span>
-								<span>Kathmandu, Bagmati Province, Nepal</span>
+								<span>Pokhara, Nepal</span>
 							</li>
 						</ul>
 					</div>
