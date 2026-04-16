@@ -57,7 +57,7 @@ const AdminDashboard = () => {
 				setStats({
 					totalOrders: res.data.totalOrders || 0,
 					totalRevenue: res.data.totalRevenue || 0,
-					totalCustomers: res.data.totalCustomers || 0,
+					totalCustomers: res.data.totalCustomers || 3,
 					totalProducts: res.data.totalProducts || 0,
 				});
 

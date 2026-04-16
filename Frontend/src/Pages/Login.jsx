@@ -14,14 +14,14 @@ const Login = () => {
 	const { updateUser, currentUser } = useContext(AuthContext);
 
 	useEffect(() => {
-	if (currentUser) {
-		if (currentUser.role === "admin") {
-			navigate("/admindashboard");
-		} else {
-			navigate("/");
+		if (currentUser) {
+			if (currentUser.role === "admin") {
+				navigate("/admindashboard");
+			} else {
+				navigate("/");
+			}
 		}
-	}
-}, [currentUser]);
+	}, [currentUser]);
 
 	const responseGoogle = async (authResult) => {
 		setIsLoading(true);
@@ -74,13 +74,18 @@ const Login = () => {
 		setError("");
 
 		try {
+			console.log("LOGIN DATA:", { email, password });
 			const response = await apiRequest.post(
 				"/auth/login",
 				{ email, password },
 				{ withCredentials: true }, // IMPORTANT
 			);
+			if (response.data.success === false) {
+				setError(response.data.message);
+				toast.error(response.data.message);
+				return;
+			}
 
-			
 			toast.success("Login successfully");
 			const user = response.data.user || response.data;
 			updateUser(response.data);
@@ -90,9 +95,12 @@ const Login = () => {
 				navigate("/");
 			}
 		} catch (error) {
-			console.log(error);
-			setError("Invalid credentials");
-			toast.error("Login failed");
+			console.log("LOGIN ERROR:", error.response?.data);
+
+			const message = error.response?.data?.message || "Login failed";
+
+			setError(message); 
+			toast.error(message);
 		} finally {
 			setIsLoading(false);
 		}

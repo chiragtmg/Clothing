@@ -13,6 +13,12 @@ const SignUp = () => {
 
 	const onSubmitHandler = async (event) => {
 		event.preventDefault();
+		// if (password.length < 8) {
+		// 	setError("Password must be at least 8 characters");
+		// 	toast.error("Password must be at least 8 characters");
+		// 	return;
+		// }
+
 		setIsLoading(true);
 		setError("");
 
@@ -22,6 +28,11 @@ const SignUp = () => {
 				email,
 				password,
 			});
+			if (response.data.success === false) {
+				setError(response.data.message);
+				toast.error(response.data.message);
+				return;
+			}
 			console.log(response.data);
 			toast.success("Resgistered Successfully");
 			navigate("/login");

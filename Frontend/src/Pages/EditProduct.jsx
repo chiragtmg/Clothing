@@ -4,8 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../Components/SideBar";
 import { apiRequest, imgBaseURL } from "../Services/API";
 import { toast } from "react-toastify";
-import { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function EditProduct() {
 	const { id } = useParams();
@@ -27,8 +26,7 @@ export default function EditProduct() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
-	const { currentUser } = useContext(AuthContext);
-
+	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth();
 	const categories = ["Men", "Women", "Kids"];
 	const subCategories = {
 		Men: ["Top wear", "Bottom wear", "Footwear", "Accessories"],
@@ -79,7 +77,16 @@ export default function EditProduct() {
 	useEffect(() => {
 		const fetchProduct = async () => {
 			try {
-				if (!currentUser || !currentUser.isAdmin) {
+				if (authLoading) return;
+
+				if (!isLoggedIn) {
+					toast.error("Please login first");
+					navigate("/login");
+					return;
+				}
+
+				if (!isAdmin) {
+					toast.error("Access denied. Admin only.");
 					navigate("/");
 					return;
 				}
@@ -106,7 +113,7 @@ export default function EditProduct() {
 		};
 
 		if (id) fetchProduct();
-	}, [id]);
+	}, [id, isLoggedIn, isAdmin, authLoading, navigate]);
 
 	const handleInputChange = (e) => {
 		const { name, value, type, checked } = e.target;
@@ -179,7 +186,6 @@ export default function EditProduct() {
 				{
 					headers: {
 						"Content-Type": "multipart/form-data",
-						Authorization: `Bearer ${currentUser?.token}`,
 					},
 				},
 			);

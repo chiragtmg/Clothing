@@ -100,7 +100,7 @@ export const loginUser = async (req, res) => {
 		if (!isMatch) {
 			return res
 				.status(401)
-				.json({ success: false, message: "Invalid credentials" });
+				.json({ success: false, message: "Password Incorrect" });
 		}
 
 		// Auto admin for your email
@@ -143,12 +143,12 @@ export const registerUser = async (req, res) => {
 
 		//validating email and strong password
 		if (!validator.isEmail(email)) {
-			return res.json({ success: false, message: "Use valid email" });
+			return res.json({ success: false, message: "Enter a valid email" });
 		}
 		if (password.length < 8) {
 			return res.json({
 				success: false,
-				message: "Please enter a strong password",
+				message: "Please enter 8 characters password",
 			});
 		}
 
