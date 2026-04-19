@@ -18,6 +18,7 @@ const Login = () => {
 			if (currentUser.role === "admin") {
 				navigate("/admindashboard");
 			} else {
+				toast("Already Logged In")
 				navigate("/");
 			}
 		}

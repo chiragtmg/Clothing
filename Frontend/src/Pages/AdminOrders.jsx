@@ -80,24 +80,14 @@ const AdminOrders = () => {
 		}
 	};
 
-	const getImage = (item) => {
-		if (!item) return `${imgBaseURL}/placeholder-product.jpg`;
-
-		if (item.image) {
-			return `${imgBaseURL}${item.image}`;
-		}
-
-		if (item.productId) {
-			if (item.productId.images?.length > 0) {
-				return `${imgBaseURL}${item.productId.images[0]}`;
-			}
-			if (item.productId.image) {
-				return `${imgBaseURL}${item.productId.image}`;
-			}
-		}
-
-		return `${imgBaseURL}/placeholder-product.jpg`;
-	};
+	const getImageUrl = (product) => {
+	if (product.images && product.images.length > 0) {
+		return `${imgBaseURL}${product.images[0]}`;
+	} else if (product.image) {
+		return `${imgBaseURL}${product.image}`;
+	}
+	return `${imgBaseURL}/images/placeholder.png`; 
+};
 
 	const statusOptions = [
 		"Pending",
@@ -186,12 +176,12 @@ const AdminOrders = () => {
 									{order.items.map((item, index) => (
 										<div key={index} className="flex gap-6 items-center">
 											<img
-												src={getImage(item)}
+												src={getImageUrl(item)}
 												alt={item.name}
 												className="w-20 h-20 object-cover rounded-xl border"
 												onError={(e) => {
 													e.target.onerror = null;
-													e.target.src = `${imgBaseURL}/placeholder-product.jpg`;
+													e.target.src = `${imgBaseURL}/images/placeholder.png`;
 												}}
 											/>
 											<div className="flex-1">

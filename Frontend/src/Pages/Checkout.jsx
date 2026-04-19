@@ -13,6 +13,7 @@ const Checkout = () => {
 	const [cartItems, setCartItems] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [isProcessingEsewa, setIsProcessingEsewa] = useState(false);
+	const [isProcessingKhalti, setIsProcessingKhalti] = useState(false);
 
 	const [formData, setFormData] = useState({
 		firstName: "",
@@ -144,6 +145,7 @@ const Checkout = () => {
 	};
 
 	const handlePlaceOrder = () => {
+		if (loading || isProcessingEsewa || isProcessingKhalti) return;
 		if (paymentMethod === "cod") {
 			handleCOD();
 		} else if (paymentMethod === "esewa") {
@@ -153,14 +155,11 @@ const Checkout = () => {
 		}
 	};
 
-	// Replace your existing handleKhaltiPayment (or the toast.info line) in Checkout.js
-	// with this function:
-
 	const handleKhaltiPayment = async () => {
 		if (!validateForm()) return;
+		setIsProcessingKhalti(true);
 
 		try {
-			// ✅ Save everything in ONE key (cleaner & recommended)
 			localStorage.setItem(
 				"pendingKhaltiOrder",
 				JSON.stringify({
@@ -172,7 +171,7 @@ const Checkout = () => {
 			);
 
 			const res = await apiRequest.post("/khalti/initiate", {
-				amount: total, // backend converts to paisa
+				amount: total,
 				cartItems,
 				shippingDetails: formData,
 			});

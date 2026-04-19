@@ -262,5 +262,3 @@ export const updateOrderStatus = async (req, res) => {
 			.json({ success: false, message: "Failed to update status" });
 	}
 };
-
-
