@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { apiRequest, imgBaseURL } from "../Services/API";
-import { toast } from "react-toastify"; // ← assuming you have react-toastify installed
+import { toast } from "react-toastify"; 
 import { useCart } from "../context/CartContext";
 import { AuthContext } from "../context/AuthContext";
 
@@ -15,7 +15,7 @@ const Product = () => {
 	const [selectedVariant, setSelectedVariant] = useState(null);
 	const [existingImages, setExistingImages] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [addingToCart, setAddingToCart] = useState(false); // ← new: button loading state
+	const [addingToCart, setAddingToCart] = useState(false); 
 	const [error, setError] = useState("");
 	const { refreshCart } = useCart();
 	const { currentUser } = useContext(AuthContext);
@@ -62,7 +62,6 @@ const Product = () => {
 		fetchProduct();
 	}, [id]);
 
-	// Auto-play thumbnails
 	useEffect(() => {
 		if (existingImages.length <= 1) return;
 
@@ -104,7 +103,7 @@ const Product = () => {
 		try {
 			const response = await apiRequest.post("/cart/add", {
 				productId: id,
-				quantity: 1, // you can make this dynamic later
+				quantity: 1, 
 			});
 
 			if (response.data.success) {
@@ -145,7 +144,6 @@ const Product = () => {
 	return (
 		<main className="container mx-auto px-4 py-8 max-w-6xl">
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-				{/* LEFT - Thumbnails */}
 				<div className="flex flex-row md:flex-col gap-3 md:gap-4 order-2 md:order-1">
 					{existingImages.map((img, index) => (
 						<div
@@ -181,7 +179,6 @@ const Product = () => {
 					)}
 				</div>
 
-				{/* RIGHT - Main content */}
 				<div className="order-1 md:order-2 space-y-6">
 					<div className="border-2 border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm aspect-[4/5] md:aspect-[3/4]">
 						{mainImage ? (
@@ -214,7 +211,6 @@ const Product = () => {
 							NPR {Number(product.price).toLocaleString()}
 						</p>
 
-						{/* Size selection */}
 						<div className="space-y-3">
 							<label className="block text-lg font-medium text-gray-900">
 								Select Size
@@ -245,14 +241,12 @@ const Product = () => {
 							</div>
 						</div>
 
-						{/* Stock status */}
 						{selectedVariant && (
 							<p className={`font-medium ${stockStatus.color}`}>
 								{stockStatus.text} ({stock} available)
 							</p>
 						)}
 
-						{/* Add to Cart button */}
 						<button
 							onClick={handleAddToCart}
 							disabled={stock === 0 || addingToCart}
@@ -301,7 +295,6 @@ const Product = () => {
 				</div>
 			</div>
 
-			{/* Related Products placeholder */}
 			<section className="mt-16 pt-12 border-t border-gray-200">
 				<h2 className="text-2xl md:text-3xl font-bold text-center mb-10">
 					Related Products

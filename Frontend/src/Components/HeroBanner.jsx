@@ -9,7 +9,6 @@ const HeroBanner = () => {
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [loading, setLoading] = useState(true);
 
-	// 🔹 Fetch Products
 	useEffect(() => {
 		const fetchProducts = async () => {
 			try {
@@ -25,7 +24,6 @@ const HeroBanner = () => {
 
 				setProducts(data);
 
-				// Find best seller
 				let best = data.find((p) => p.bestSeller) || data[0];
 				setBestSeller(best);
 			} catch (err) {
@@ -39,7 +37,6 @@ const HeroBanner = () => {
 		fetchProducts();
 	}, []);
 
-	// 🔁 Loop through products (RIGHT SIDE)
 	useEffect(() => {
 		if (products.length < 2) return;
 
@@ -50,7 +47,6 @@ const HeroBanner = () => {
 		return () => clearInterval(interval);
 	}, [products]);
 
-	// 🔹 Filter out best seller for right side
 	const filteredProducts = products.filter(
 		(p) => p._id !== bestSeller?._id
 	);
@@ -60,7 +56,6 @@ const HeroBanner = () => {
 			? filteredProducts[currentIndex % filteredProducts.length]
 			: bestSeller;
 
-	// 🔹 Loading UI
 	if (loading) {
 		return (
 			<section className="h-[500px] md:h-[600px] bg-gray-100 flex items-center justify-center">
@@ -71,7 +66,6 @@ const HeroBanner = () => {
 		);
 	}
 
-	// 🔹 Empty State
 	if (!bestSeller || !randomProduct) {
 		return (
 			<section className="h-[500px] md:h-[600px] bg-gray-100 flex items-center justify-center">
@@ -91,7 +85,6 @@ const HeroBanner = () => {
 		<section className="relative">
 			<div className="grid grid-cols-1 md:grid-cols-2 h-[500px] md:h-[600px]">
 				
-				{/* LEFT - Best Seller */}
 				<div className="relative bg-blue-600 overflow-hidden group">
 					<img
 						src={`${imgBaseURL}${
@@ -124,7 +117,6 @@ const HeroBanner = () => {
 					</div>
 				</div>
 
-				{/* RIGHT - Rotating Product */}
 				<div className="relative bg-gradient-to-br from-amber-50 to-amber-100 overflow-hidden group">
 					<img
 						src={`${imgBaseURL}${

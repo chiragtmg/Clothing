@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
 	const [cartItems, setCartItems] = useState([]);
 	const [loading, setLoading] = useState(false);
 
-	const { isLoggedIn } = useContext(AuthContext);     // ← Get login status from AuthContext
+	const { isLoggedIn } = useContext(AuthContext);     
 
 	const fetchCart = useCallback(async () => {
 		if (!isLoggedIn) {
@@ -32,7 +32,6 @@ export const CartProvider = ({ children }) => {
 		}
 	}, [isLoggedIn]);
 
-	// Fetch cart when login status changes
 	useEffect(() => {
 		fetchCart();
 	}, [fetchCart]);

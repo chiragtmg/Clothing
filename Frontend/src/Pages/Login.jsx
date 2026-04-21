@@ -33,15 +33,14 @@ const Login = () => {
 
 			const result = await googleAuth(authResult.code);
 
-			console.log("🔍 Google Response from Backend:", result.data); // ← Debug
+			console.log("🔍 Google Response from Backend:", result.data);
 
-			// FIXED: Include role properly
 			const userObj = {
 				_id: result.data._id,
 				username: result.data.username,
 				email: result.data.email,
 				avatar: result.data.avatar,
-				role: result.data.role || "customer", // ← This was missing
+				role: result.data.role || "customer", 
 			};
 
 			console.log("✅ Saving user with role:", userObj.role);
@@ -49,9 +48,8 @@ const Login = () => {
 			updateUser(userObj);
 			toast.success("Login successfully");
 
-			// Redirect based on role
 			if (userObj.role === "admin") {
-				navigate("/admin/orders"); // or "/dashboard" if you prefer
+				navigate("/admin/orders"); 
 			} else {
 				navigate("/");
 			}
@@ -79,7 +77,7 @@ const Login = () => {
 			const response = await apiRequest.post(
 				"/auth/login",
 				{ email, password },
-				{ withCredentials: true }, // IMPORTANT
+				{ withCredentials: true }, 
 			);
 			if (response.data.success === false) {
 				setError(response.data.message);

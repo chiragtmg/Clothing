@@ -28,7 +28,6 @@ const Cart = () => {
 				const items = res.data.cart || [];
 				setCartItems(items);
 
-				// Calculate total
 				const sum = items.reduce(
 					(acc, item) => acc + item.price * item.quantity,
 					0,
@@ -54,17 +53,14 @@ const Cart = () => {
 		return "/placeholder-product.jpg";
 	};
 
-	// Update quantity
 	const updateQuantity = async (productId, newQuantity) => {
-		if (newQuantity < 1) return; // prevent going below 1 here (remove handles 0)
-
+		if (newQuantity < 1) return; 
 		try {
 			await apiRequest.put("/cart/update", {
 				productId,
 				quantity: newQuantity,
 			});
 
-			// Optimistic update
 			setCartItems((prev) =>
 				prev.map((item) =>
 					item.productId === productId
@@ -73,7 +69,6 @@ const Cart = () => {
 				),
 			);
 
-			// Update total
 			setTotal(
 				(prev) =>
 					prev +
@@ -95,7 +90,6 @@ const Cart = () => {
 			refreshCart();
 			console.log("DELETE RESPONSE:", res.data);
 
-			// Optimistic remove
 			const removedItem = cartItems.find(
 				(item) => item.productId === productId,
 			);
@@ -103,7 +97,6 @@ const Cart = () => {
 				prev.filter((item) => item.productId !== productId),
 			);
 
-			// Update total
 			setTotal((prev) => prev - removedItem.price * removedItem.quantity);
 
 			toast.success("Item removed from cart");
@@ -162,7 +155,6 @@ const Cart = () => {
 					</div>
 				) : (
 					<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-						{/* Cart Items */}
 						<div className="lg:col-span-2">
 							<div className="bg-white rounded-xl shadow-sm overflow-hidden">
 								{cartItems.map((item) => (
@@ -170,7 +162,6 @@ const Cart = () => {
 										key={item.productId}
 										className="flex flex-col sm:flex-row items-center border-b last:border-b-0 p-6 gap-6 hover:bg-gray-50 transition"
 									>
-										{/* Image */}
 										<div className="w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
 											<img
 												src={getImage(item)}
@@ -182,7 +173,6 @@ const Cart = () => {
 											/>
 										</div>
 
-										{/* Details */}
 										<div className="flex-1">
 											<h3 className="text-lg font-semibold text-gray-900 mb-1">
 												{item.name}
@@ -191,7 +181,6 @@ const Cart = () => {
 												NPR {Number(item.price).toLocaleString()}
 											</p>
 
-											{/* Quantity controls */}
 											<div className="flex items-center gap-4">
 												<button
 													onClick={() =>
@@ -216,7 +205,6 @@ const Cart = () => {
 											</div>
 										</div>
 
-										{/* Subtotal & Remove */}
 										<div className="text-right min-w-[140px]">
 											<p className="text-lg font-bold text-gray-900">
 												NPR {(item.price * item.quantity).toLocaleString()}
@@ -233,7 +221,6 @@ const Cart = () => {
 							</div>
 						</div>
 
-						{/* Order Summary */}
 						<div className="lg:col-span-1">
 							<div className="bg-white rounded-xl shadow-sm p-6 sticky top-6">
 								<h2 className="text-xl font-bold text-gray-900 mb-6">

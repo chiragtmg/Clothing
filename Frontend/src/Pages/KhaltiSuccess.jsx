@@ -25,7 +25,6 @@ const KhaltiSuccess = () => {
 		hasVerified.current = true;
 
 		verifyPayment();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pidx]);
 
 	const verifyPayment = async () => {
@@ -39,7 +38,6 @@ const KhaltiSuccess = () => {
 				);
 			}
 
-			// ✅ Only send pidx (do NOT send cartItems etc.)
 			const { data } = await apiRequest.post("/khalti/verify", {
 				pidx,
 				pendingOrder,

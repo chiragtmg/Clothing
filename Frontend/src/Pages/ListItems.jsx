@@ -14,7 +14,7 @@ export default function ListItems() {
 	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth();
 
 	useEffect(() => {
-		if (authLoading) return; // Wait until auth is loaded
+		if (authLoading) return; 
 
 		if (!isLoggedIn) {
 			toast.error("Please login first");
@@ -63,7 +63,6 @@ export default function ListItems() {
 
 		try {
 			await apiRequest.delete(`/product/delete/product/${id}`);
-			// Remove from UI immediately (optimistic update)
 			setProducts((prev) => prev.filter((p) => p._id !== id));
 			toast.success("Product deleted successfully");
 		} catch (err) {

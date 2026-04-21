@@ -18,12 +18,4 @@ export const verifyToken = async (req, res, next) => {
 	});
 };
 
-// export const verifyTokenAndAuthorization = async (req, res, next) => {
-// 	verifyToken(req, res, () => {
-// 		if (req.userId === req.params.id) {
-// 			next();
-// 		} else {
-// 			res.status(403).json({ message: "You are not allowed to do that!" });
-// 		}
-// 	});
-// };
+

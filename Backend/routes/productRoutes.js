@@ -1,3 +1,4 @@
+import { verifyTokenAndAdmin } from "../config/middleware/adminOnly.js";
 import { upload } from "../config/middleware/upload.js";
 import { verifyToken } from "../config/middleware/verifyToken.js";
 import {
@@ -14,16 +15,23 @@ const router = express.Router();
 router.post(
 	"/create/product",
 	verifyToken,
+	verifyTokenAndAdmin,
 	upload.array("images", 3),
 	createProduct,
 );
 router.put(
 	"/edit/product/:id",
 	verifyToken,
+	verifyTokenAndAdmin,
 	upload.array("images", 3),
 	updateProduct,
 );
-router.delete("/delete/product/:id", verifyToken, deleteProduct);
+router.delete(
+	"/delete/product/:id",
+	verifyToken,
+	verifyTokenAndAdmin,
+	deleteProduct,
+);
 router.get("/get/product", getAllProducts);
 router.get("/get/product/:id", getProductById);
 

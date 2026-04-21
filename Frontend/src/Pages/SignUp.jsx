@@ -13,12 +13,6 @@ const SignUp = () => {
 
 	const onSubmitHandler = async (event) => {
 		event.preventDefault();
-		// if (password.length < 8) {
-		// 	setError("Password must be at least 8 characters");
-		// 	toast.error("Password must be at least 8 characters");
-		// 	return;
-		// }
-
 		setIsLoading(true);
 		setError("");
 
@@ -45,7 +39,6 @@ const SignUp = () => {
 	};
 	return (
 		<>
-			{/* Main Content - Centered Form */}
 			<div className="min-h-screen bg-white flex items-center justify-center px-6 -mt-20">
 				<div className="w-full max-w-md bg-gradient-to-b from-gray-200 to-gray-400 rounded-3xl shadow-2xl p-10">
 					<h2 className="text-4xl font-bold text-center mb-10 underline decoration-gray-600">

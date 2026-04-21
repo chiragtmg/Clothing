@@ -14,7 +14,7 @@ import {
 import { Pie, Bar } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import SideBar from "../Components/SideBar";   // ← Import Sidebar
+import SideBar from "../Components/SideBar";   
 
 ChartJS.register(
 	ArcElement,
@@ -82,7 +82,6 @@ const AdminDashboard = () => {
 		fetchDashboardData();
 	}, [isLoggedIn, isAdmin, authLoading, navigate]);
 
-	// Pie Chart Data
 	const pieData = {
 		labels: ["Men's Category", "Women's Category"],
 		datasets: [
@@ -116,7 +115,6 @@ const AdminDashboard = () => {
 		},
 	};
 
-	// Bar Chart Data
 	const barData = {
 		labels: monthlySales.length
 			? monthlySales.map((item) => item.month)
@@ -177,7 +175,6 @@ const AdminDashboard = () => {
 						</button>
 					</div>
 
-					{/* Summary Cards */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 						<div className="bg-white p-6 rounded-3xl shadow-sm">
 							<p className="text-gray-500 text-sm">Total Orders</p>
@@ -199,7 +196,6 @@ const AdminDashboard = () => {
 						</div>
 					</div>
 
-					{/* Charts Section */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 						{/* Pie Chart - Gender Distribution */}
 						<div className="bg-white p-8 rounded-3xl shadow-sm">
@@ -209,7 +205,6 @@ const AdminDashboard = () => {
 							</div>
 						</div>
 
-						{/* Bar Chart - Monthly Sales */}
 						<div className="bg-white p-8 rounded-3xl shadow-sm">
 							<h2 className="text-2xl font-semibold mb-6">Monthly Sales</h2>
 							<div className="h-96">
@@ -218,7 +213,6 @@ const AdminDashboard = () => {
 						</div>
 					</div>
 
-					{/* You can add Recent Orders table here later */}
 				</main>
 			</div>
 		</div>

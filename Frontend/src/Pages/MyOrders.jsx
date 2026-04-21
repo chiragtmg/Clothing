@@ -6,12 +6,11 @@ const MyOrders = () => {
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
 
-	// Pagination States
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalOrders, setTotalOrders] = useState(0);
 
-	const ordersPerPage = 5; // You can change this
+	const ordersPerPage = 5; 
 
 	useEffect(() => {
 		fetchOrders(currentPage);
@@ -149,7 +148,6 @@ const MyOrders = () => {
 							))}
 						</div>
 
-						{/* Pagination Controls */}
 						{totalPages > 1 && (
 							<div className="flex justify-center items-center gap-3 mt-12">
 								<button

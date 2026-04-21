@@ -3,7 +3,6 @@ import Product from "../models/productModel.js";
 
 export const getAnalytics = async (req, res) => {
 	try {
-		// Basic Stats
 		const totalOrders = await Order.countDocuments();
 		const totalRevenueResult = await Order.aggregate([
 			{ $group: { _id: null, total: { $sum: "$totalAmount" } } },
@@ -14,21 +13,20 @@ export const getAnalytics = async (req, res) => {
 		const totalProducts = (await Product.countDocuments()) || 0;
 
 		const genderResult = await Order.aggregate([
-			{ $unwind: "$items" }, // Flatten items array
+			{ $unwind: "$items" }, 
 			{
 				$lookup: {
-					// Join with Product collection
-					from: "products", // Collection name (lowercase + 's')
+					from: "products",
 					localField: "items.productId",
 					foreignField: "_id",
 					as: "productInfo",
 				},
 			},
-			{ $unwind: "$productInfo" }, // Get the joined product
+			{ $unwind: "$productInfo" },
 			{
 				$group: {
-					_id: "$productInfo.category", // Group by Product.category (Men / Women)
-					count: { $sum: "$items.quantity" }, // Total quantity sold (more accurate)
+					_id: "$productInfo.category",
+					count: { $sum: "$items.quantity" },
 				},
 			},
 		]);
@@ -45,13 +43,11 @@ export const getAnalytics = async (req, res) => {
 			}
 		});
 
-		// Fallback if no data yet
 		if (menCount === 0 && womenCount === 0) {
 			menCount = Math.floor(totalOrders * 0.65);
 			womenCount = totalOrders - menCount;
 		}
 
-		// Monthly Sales (Last 6 months)
 		const monthlySales = await Order.aggregate([
 			{
 				$group: {

@@ -15,13 +15,12 @@ export const AuthContextProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load from localStorage on app start
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser);
-        console.log("🔄 Loaded user from localStorage:", user);   // Debug
+        console.log("🔄 Loaded user from localStorage:", user);   
         setCurrentUser(user);
       } catch (e) {
         console.error("Failed to parse user from localStorage");
@@ -32,7 +31,7 @@ export const AuthContextProvider = ({ children }) => {
   }, []);
 
   const updateUser = (data) => {
-    console.log("💾 updateUser called with:", data);   // Debug
+    console.log("💾 updateUser called with:", data);   
 
     if (!data) return;
 
@@ -41,7 +40,7 @@ export const AuthContextProvider = ({ children }) => {
       username: data.username,
       email: data.email,
       avatar: data.avatar,
-      role: data.role || "customer",        // ← Force role fallback
+      role: data.role || "customer",        
     };
 
     console.log("✅ Saving to localStorage with role:", userData.role);

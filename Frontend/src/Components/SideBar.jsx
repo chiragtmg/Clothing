@@ -21,7 +21,6 @@ const Sidebar = () => {
   return (
     <aside className="hidden md:flex md:flex-col w-64 bg-white border-r border-gray-200 min-h-screen shadow-sm">
       
-      {/* 🔹 Profile Section */}
       <div className="p-6 border-b border-gray-200 flex items-center gap-3 relative">
         <button
           onClick={() => setShowDropdown(!showDropdown)}
@@ -47,7 +46,6 @@ const Sidebar = () => {
           </div>
         </button>
 
-        {/* Dropdown */}
         {showDropdown && (
           <div className="absolute top-16 left-6 w-48 bg-white shadow-lg rounded-lg border border-gray-200 py-2 z-50">
             <Link
@@ -67,7 +65,6 @@ const Sidebar = () => {
         )}
       </div>
 
-      {/* 🔹 Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2">
 
         <Link
@@ -116,7 +113,6 @@ const Sidebar = () => {
 
       </nav>
 
-      {/* 🔹 Footer (optional branding) */}
       <div className="p-4 text-xs text-gray-400 border-t">
         © 2026 Clothing Admin
       </div>

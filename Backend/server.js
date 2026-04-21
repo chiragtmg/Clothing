@@ -15,27 +15,24 @@ import analyticRoutes from "./routes/analyticRoutes.js"
 import cookieParser from "cookie-parser";
 import path from "path";
 
-// App conifg
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB();
 connectCloudinary();
 
-// middlewares
-app.use(express.json()); //request passed to json
-app.use(cookieParser()); //used as pocket for token to store
+app.use(express.json()); 
+app.use(cookieParser()); 
 app.use(
 	cors({
 		origin: "http://localhost:5173",
-		credentials: true, // to connect to frontend
+		credentials: true, 
 	}),
-); // to access backend from any ip
+); 
 app.use(
 	"/images",
 	express.static(path.join(process.cwd(), "public", "images")),
 );
 
-//api end points
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/product", productRoutes);

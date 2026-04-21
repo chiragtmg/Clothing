@@ -76,7 +76,6 @@ const EditProfile = () => {
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-12">
 			<div className="w-full max-w-lg bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-				{/* Header / Profile Image Section */}
 				<div className="bg-gradient-to-r from-indigo-600 to-purple-600 pt-10 pb-6 px-8 text-center">
 					<div className="relative mx-auto w-32 h-32">
 						<img
@@ -117,7 +116,6 @@ const EditProfile = () => {
 					</h2>
 				</div>
 
-				{/* Form Section */}
 				<div className="p-8">
 					{error && (
 						<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm">
@@ -126,7 +124,6 @@ const EditProfile = () => {
 					)}
 
 					<form onSubmit={handleSubmit} className="space-y-8">
-						{/* Email Display (Non-editable) */}
 						<div>
 							<label className="block text-sm font-medium text-gray-500 mb-1">
 								Email Address
@@ -148,7 +145,6 @@ const EditProfile = () => {
 							
 						</div>
 
-						{/* Username */}
 						<div>
 							<label
 								htmlFor="username"
@@ -168,8 +164,6 @@ const EditProfile = () => {
 								placeholder="Enter username"
 							/>
 						</div>
-
-						{/* Hidden File Input already handled above */}
 
 						<button
 							type="submit"

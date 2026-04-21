@@ -9,7 +9,6 @@ export const updateUser = async (req, res) => {
 
 		let avatar = req.body?.avatar;
 
-		// ✅ use your multer uploaded file
 		if (req.file) {
 			avatar = `/images/${req.file.filename}`;
 		}

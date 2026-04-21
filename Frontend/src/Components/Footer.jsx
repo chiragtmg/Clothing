@@ -3,7 +3,6 @@ const Footer = () => {
 		<footer className="bg-gradient-to-r from-teal-700 to-teal-900 text-white">
 			<div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-					{/* Brand / Logo Area */}
 					<div>
 						<h2 className="text-3xl font-bold mb-4">Clothing</h2>
 						<p className="text-teal-100 mb-6">
@@ -15,7 +14,6 @@ const Footer = () => {
 						</p>
 					</div>
 
-					{/* Quick Links */}
 					<div>
 						<h3 className="text-xl font-semibold mb-6">Quick Links</h3>
 						<ul className="space-y-3">
@@ -59,7 +57,6 @@ const Footer = () => {
 						</ul>
 					</div>
 
-					{/* Get In Touch */}
 					<div>
 						<h3 className="text-xl font-semibold mb-6">Get In Touch</h3>
 						<ul className="space-y-4">

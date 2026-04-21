@@ -14,7 +14,6 @@ export const createOrder = async (req, res) => {
 				.json({ success: false, message: "No items in order" });
 		}
 
-		// Stock Deduction with better matching
 		for (const item of items) {
 			const product = await Product.findById(item.productId);
 			if (!product) {
@@ -24,20 +23,16 @@ export const createOrder = async (req, res) => {
 				});
 			}
 
-			// Improved size matching logic
 			let variant = null;
 
-			// 1. Try exact size match
 			if (item.size) {
 				variant = product.variants.find((v) => v.size === item.size);
 			}
 
-			// 2. Try "One Size" as fallback
 			if (!variant) {
 				variant = product.variants.find((v) => v.size === "One Size");
 			}
 
-			// 3. If still not found, take the first available variant (last resort)
 			if (!variant && product.variants.length > 0) {
 				variant = product.variants[0];
 			}
@@ -49,7 +44,6 @@ export const createOrder = async (req, res) => {
 				});
 			}
 
-			// Check stock
 			if (variant.stock < item.quantity) {
 				return res.status(400).json({
 					success: false,
@@ -57,12 +51,10 @@ export const createOrder = async (req, res) => {
 				});
 			}
 
-			// Deduct stock
 			variant.stock -= item.quantity;
 			await product.save();
 		}
 
-		// Create Order
 		const newOrder = await Order.create({
 			user: userId,
 			items,
@@ -95,7 +87,6 @@ export const createOrder = async (req, res) => {
   `,
 			});
 
-			// ✅ SEND EMAIL TO ADMIN
 			await sendEmail({
 				to: process.env.ADMIN_EMAIL,
 				subject: "New Order Received 🛒",
@@ -124,7 +115,6 @@ export const createOrder = async (req, res) => {
 			console.error("❌ Email error FULL:", error);
 		}
 
-		// Clear Cart
 		await User.findByIdAndUpdate(userId, { cartData: {} });
 
 		res.status(201).json({
@@ -141,20 +131,16 @@ export const createOrder = async (req, res) => {
 	}
 };
 
-// Get My Orders
 export const getMyOrders = async (req, res) => {
 	try {
 		const userId = req.userId;
 
-		// Pagination
 		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 5; // 5 orders per page
+		const limit = parseInt(req.query.limit) || 5; 
 		const skip = (page - 1) * limit;
 
-		// Get total count for pagination info
 		const totalOrders = await Order.countDocuments({ user: userId });
 
-		// Fetch orders with pagination
 		const orders = await Order.find({ user: userId })
 			.sort({ createdAt: -1 })
 			.skip(skip)
@@ -179,27 +165,23 @@ export const getMyOrders = async (req, res) => {
 		});
 	}
 };
-// controllers/orderController.js
 
 export const getAllOrders = async (req, res) => {
 	try {
-		// Pagination - Same logic as your getMyOrders
 		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10; // 10 orders per page for admin (recommended)
+		const limit = parseInt(req.query.limit) || 10;
 		const skip = (page - 1) * limit;
 
-		// Get total count
 		const totalOrders = await Order.countDocuments();
 
-		// Fetch orders with pagination
 		const orders = await Order.find()
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit)
-			.populate("user", "name email") // Show customer info
+			.populate("user", "name email")
 			.populate({
 				path: "items.productId",
-				select: "name images image", // Important for images
+				select: "name images image",
 			});
 
 		const totalPages = Math.ceil(totalOrders / limit);
@@ -222,7 +204,6 @@ export const getAllOrders = async (req, res) => {
 	}
 };
 
-// Update Order Status
 export const updateOrderStatus = async (req, res) => {
 	try {
 		const { orderId } = req.params;

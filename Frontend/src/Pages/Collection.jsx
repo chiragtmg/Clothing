@@ -7,11 +7,9 @@ const Collection = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	// Filter states
 	const [selectedCategories, setSelectedCategories] = useState([]);
 	const [selectedTypes, setSelectedTypes] = useState([]);
 
-	// Sort state
 	const [sortOption, setSortOption] = useState("Relevance");
 
 	useEffect(() => {
@@ -38,17 +36,14 @@ const Collection = () => {
 	const filteredAndSortedProducts = useMemo(() => {
 		let result = [...products];
 
-		// 1. Category filter
 		if (selectedCategories.length > 0) {
 			result = result.filter((p) => selectedCategories.includes(p.category));
 		}
 
-		// 2. Type (subCategory) filter
 		if (selectedTypes.length > 0) {
 			result = result.filter((p) => selectedTypes.includes(p.subCategory));
 		}
 
-		// 3. Sorting
 		switch (sortOption) {
 			case "Price: Low to High":
 				result.sort((a, b) => a.price - b.price);
@@ -68,7 +63,6 @@ const Collection = () => {
 
 			case "Relevance":
 			default:
-				// keep original order from DB (or you can add your own relevance logic)
 				break;
 		}
 
@@ -108,12 +102,10 @@ const Collection = () => {
 	return (
 		<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
 			<div className="flex flex-col lg:flex-row gap-8 xl:gap-10">
-				{/* Sidebar Filters */}
 				<aside className="w-full lg:w-72 xl:w-80 flex-shrink-0">
 					<div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 sticky top-20">
 						<h2 className="text-2xl font-bold text-gray-900 mb-8">FILTERS</h2>
 
-						{/* Categories */}
 						<div className="mb-10">
 							<h3 className="text-lg font-semibold text-gray-800 mb-4">
 								CATEGORIES
@@ -134,7 +126,6 @@ const Collection = () => {
 							</div>
 						</div>
 
-						{/* Type */}
 						<div className="mb-10">
 							<h3 className="text-lg font-semibold text-gray-800 mb-4">TYPE</h3>
 							<div className="space-y-3">
@@ -155,7 +146,6 @@ const Collection = () => {
 					</div>
 				</aside>
 
-				{/* Products Section */}
 				<div className="flex-1">
 					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
 						<h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -181,7 +171,6 @@ const Collection = () => {
 						</div>
 					</div>
 
-					{/* Product Grid */}
 					{filteredAndSortedProducts.length > 0 ? (
 						<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 lg:gap-7">
 							{filteredAndSortedProducts.map((product) => (

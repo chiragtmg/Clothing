@@ -9,7 +9,7 @@ export const createProduct = async (req, res) => {
 		price,
 		category,
 		subCategory,
-		variants, // ← new field (JSON string)
+		variants,
 		bestSeller,
 	} = req.body;
 
@@ -24,14 +24,12 @@ export const createProduct = async (req, res) => {
 			});
 		}
 
-		// ── Parse variants ───────────────────────────────────────
 		let parsedVariants = [];
 
 		if (variants) {
 			try {
 				parsedVariants = JSON.parse(variants);
 
-				// Basic validation / cleanup
 				if (!Array.isArray(parsedVariants)) {
 					throw new Error("Variants must be an array");
 				}
@@ -52,7 +50,6 @@ export const createProduct = async (req, res) => {
 			}
 		}
 
-		// Optional: enforce at least one variant
 		if (parsedVariants.length === 0) {
 			return res.status(400).json({
 				success: false,
@@ -60,7 +57,6 @@ export const createProduct = async (req, res) => {
 			});
 		}
 
-		// ── Create product ───────────────────────────────────────
 		const newProduct = await Product.create({
 			name,
 			description,
@@ -68,7 +64,7 @@ export const createProduct = async (req, res) => {
 			images: imagePaths,
 			category,
 			subCategory,
-			variants: parsedVariants, // ← now matches your schema
+			variants: parsedVariants,
 			bestSeller:
 				bestSeller === "true" || bestSeller === true || bestSeller === "1",
 		});
@@ -81,7 +77,6 @@ export const createProduct = async (req, res) => {
 	} catch (error) {
 		console.error("Error creating product:", error);
 
-		// Clean up uploaded files if product creation fails
 		if (req.files && req.files.length > 0) {
 			req.files.forEach((file) => {
 				fs.unlink(file.path, (err) => {
@@ -98,125 +93,111 @@ export const createProduct = async (req, res) => {
 	}
 };
 
-// Update product
 export const updateProduct = async (req, res) => {
-  try {
-    const productId = req.params.id;
-    const updateData = { ...req.body };
+	try {
+		const productId = req.params.id;
+		const updateData = { ...req.body };
 
-    // Find existing product
-    const existingProduct = await Product.findById(productId);
-    if (!existingProduct) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
+		const existingProduct = await Product.findById(productId);
+		if (!existingProduct) {
+			return res.status(404).json({
+				success: false,
+				message: "Product not found",
+			});
+		}
 
-    // ─── Handle price ────────────────────────────────────────
-    if (updateData.price) {
-      updateData.price = Number(updateData.price);
-    }
+		if (updateData.price) {
+			updateData.price = Number(updateData.price);
+		}
 
-    // ─── Handle bestSeller ───────────────────────────────────
-    if (updateData.bestSeller !== undefined) {
-      updateData.bestSeller =
-        updateData.bestSeller === "true" || updateData.bestSeller === true;
-    }
+		if (updateData.bestSeller !== undefined) {
+			updateData.bestSeller =
+				updateData.bestSeller === "true" || updateData.bestSeller === true;
+		}
 
-    // ─── NEW: Handle variants (this is what was missing / causing error) ──
-    if (updateData.variants) {
-      try {
-        // If frontend sent JSON string → parse it
-        updateData.variants = JSON.parse(updateData.variants);
-      } catch (err) {
-        // If parsing fails → show clear message
-        return res.status(400).json({
-          success: false,
-          message: "Invalid variants data format. Must be valid JSON array.",
-        });
-      }
+		if (updateData.variants) {
+			try {
+				updateData.variants = JSON.parse(updateData.variants);
+			} catch (err) {
+				return res.status(400).json({
+					success: false,
+					message: "Invalid variants data format. Must be valid JSON array.",
+				});
+			}
 
-      // Optional: very basic check (good for beginners)
-      if (!Array.isArray(updateData.variants)) {
-        return res.status(400).json({
-          success: false,
-          message: "Variants must be an array",
-        });
-      }
-    }
+			if (!Array.isArray(updateData.variants)) {
+				return res.status(400).json({
+					success: false,
+					message: "Variants must be an array",
+				});
+			}
+		}
 
-    // ─── Handle old sizes field (you can keep or remove later) ─────────────
-    if (updateData.sizes) {
-      if (typeof updateData.sizes === "string") {
-        try {
-          updateData.sizes = JSON.parse(updateData.sizes);
-        } catch (e) {
-          updateData.sizes = updateData.sizes.split(",").map((s) => s.trim());
-        }
-      }
-    }
+		if (updateData.sizes) {
+			if (typeof updateData.sizes === "string") {
+				try {
+					updateData.sizes = JSON.parse(updateData.sizes);
+				} catch (e) {
+					updateData.sizes = updateData.sizes.split(",").map((s) => s.trim());
+				}
+			}
+		}
 
-    // ─── Handle images (your existing code) ────────────────────────────────
-    let oldImages = [];
-    if (req.files && req.files.length > 0) {
-      const newImagePaths = req.files.map((file) => `/images/${file.filename}`);
+		let oldImages = [];
+		if (req.files && req.files.length > 0) {
+			const newImagePaths = req.files.map((file) => `/images/${file.filename}`);
 
-      const keepExistingImages = req.body.keepExistingImages === "true";
+			const keepExistingImages = req.body.keepExistingImages === "true";
 
-      if (keepExistingImages) {
-        updateData.images = [...existingProduct.images, ...newImagePaths];
-      } else {
-        oldImages = existingProduct.images;
-        updateData.images = newImagePaths;
-      }
-    }
+			if (keepExistingImages) {
+				updateData.images = [...existingProduct.images, ...newImagePaths];
+			} else {
+				oldImages = existingProduct.images;
+				updateData.images = newImagePaths;
+			}
+		}
 
-    // ─── Save changes ──────────────────────────────────────────────────────
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      updateData,
-      { new: true, runValidators: true }
-    );
+		const updatedProduct = await Product.findByIdAndUpdate(
+			productId,
+			updateData,
+			{ new: true, runValidators: true },
+		);
 
-    // Delete old images if replaced
-    if (oldImages.length > 0) {
-      oldImages.forEach((imagePath) => {
-        const filename = imagePath.replace("/images/", "");
-        const fullPath = path.join(process.cwd(), "public", "images", filename);
+		if (oldImages.length > 0) {
+			oldImages.forEach((imagePath) => {
+				const filename = imagePath.replace("/images/", "");
+				const fullPath = path.join(process.cwd(), "public", "images", filename);
 
-        fs.unlink(fullPath, (err) => {
-          if (err) console.error("Error deleting old image:", err);
-        });
-      });
-    }
+				fs.unlink(fullPath, (err) => {
+					if (err) console.error("Error deleting old image:", err);
+				});
+			});
+		}
 
-    res.status(200).json({
-      success: true,
-      message: "Product updated successfully",
-      data: updatedProduct,
-    });
-  } catch (error) {
-    console.log("Error updating product:", error);
+		res.status(200).json({
+			success: true,
+			message: "Product updated successfully",
+			data: updatedProduct,
+		});
+	} catch (error) {
+		console.log("Error updating product:", error);
 
-    // Clean up uploaded files if failed
-    if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => {
-        fs.unlink(file.path, (err) => {
-          if (err) console.error("Error deleting file:", err);
-        });
-      });
-    }
+		if (req.files && req.files.length > 0) {
+			req.files.forEach((file) => {
+				fs.unlink(file.path, (err) => {
+					if (err) console.error("Error deleting file:", err);
+				});
+			});
+		}
 
-    res.status(500).json({
-      success: false,
-      message: "Server error while updating product",
-      error: error.message,
-    });
-  }
+		res.status(500).json({
+			success: false,
+			message: "Server error while updating product",
+			error: error.message,
+		});
+	}
 };
 
-// Get all products
 export const getAllProducts = async (req, res) => {
 	try {
 		const products = await Product.find().sort({ createdAt: -1 });
@@ -235,7 +216,6 @@ export const getAllProducts = async (req, res) => {
 	}
 };
 
-// Delete product
 export const deleteProduct = async (req, res) => {
 	try {
 		const product = await Product.findById(req.params.id);
@@ -247,7 +227,6 @@ export const deleteProduct = async (req, res) => {
 			});
 		}
 
-		// Delete associated images
 		if (product.images && product.images.length > 0) {
 			product.images.forEach((imagePath) => {
 				const filename = imagePath.replace("/images/", "");
@@ -275,7 +254,6 @@ export const deleteProduct = async (req, res) => {
 	}
 };
 
-// Get product by ID
 export const getProductById = async (req, res) => {
 	try {
 		const product = await Product.findById(req.params.id);

@@ -90,9 +90,7 @@ const Navbar = () => {
 				</li>
 			</ul>
 
-			{/* Right side icons */}
 			<div className="flex items-center gap-8 sm:gap-10">
-				{/* Search – always visible */}
 				<Link to="/search" className="relative group">
 					<img
 						src={assets.search_icon}
@@ -158,7 +156,6 @@ const Navbar = () => {
 					</Link>
 				)}
 
-				{/* Cart – only visible when logged in */}
 				{currentUser && (
 					<Link to="/cart" className="relative group" onClick={refreshCart}>
 						<img
@@ -177,7 +174,6 @@ const Navbar = () => {
 					</Link>
 				)}
 
-				{/* Mobile menu button (optional – you can hide/show based on currentUser too if desired) */}
 				<button className="sm:hidden">
 					<img src={assets.menu_icon} className="w-8 h-8" alt="Menu" />
 				</button>

@@ -5,7 +5,6 @@ import { verifyTokenAndAdmin } from "../config/middleware/adminOnly.js";
 
 const router = express.Router();
 
-// Protect all order routes
 router.use(verifyToken);
 
 router.post("/create", createOrder);

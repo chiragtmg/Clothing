@@ -16,7 +16,7 @@ export default function EditProduct() {
 		category: "Men",
 		subCategory: "Top wear",
 		price: "",
-		variants: [], // ← now using variants array like in AddProduct
+		variants: [], 
 		bestSeller: false,
 	});
 
@@ -36,7 +36,6 @@ export default function EditProduct() {
 
 	const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "One Size"];
 
-	// ─── Helpers (same as AddProduct) ───────────────────────────────────────
 	const toggleSize = (size) => {
 		setFormData((prev) => {
 			const exists = prev.variants.some((v) => v.size === size);
@@ -73,7 +72,6 @@ export default function EditProduct() {
 	const isSizeSelected = (size) =>
 		formData.variants.some((v) => v.size === size);
 
-	// ─── Fetch product ──────────────────────────────────────────────────────
 	useEffect(() => {
 		const fetchProduct = async () => {
 			try {
@@ -152,7 +150,6 @@ export default function EditProduct() {
 		setError("");
 		setSuccess("");
 
-		// Basic validation
 		if (!formData.name || !formData.description || !formData.price) {
 			setError("Please fill in all required fields");
 			setIsLoading(false);
@@ -233,7 +230,6 @@ export default function EditProduct() {
 							</div>
 						)}
 
-						{/* Existing Images */}
 						{existingImages.length > 0 && (
 							<div className="mb-8">
 								<label className="block text-sm font-medium text-gray-700 mb-2">
@@ -252,7 +248,6 @@ export default function EditProduct() {
 							</div>
 						)}
 
-						{/* New Images Upload */}
 						<div className="mb-8">
 							<label className="block text-sm font-medium text-gray-700 mb-2">
 								Upload New Images (optional – replaces existing)
@@ -308,7 +303,6 @@ export default function EditProduct() {
 								/>
 							</div>
 
-							{/* Description */}
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-1.5">
 									Description *
@@ -323,7 +317,6 @@ export default function EditProduct() {
 								/>
 							</div>
 
-							{/* Category + Sub + Price */}
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 								<div>
 									<label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -380,7 +373,6 @@ export default function EditProduct() {
 								</div>
 							</div>
 
-							{/* Sizes & Stock */}
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-3">
 									Available Sizes & Stock *
@@ -434,7 +426,6 @@ export default function EditProduct() {
 								)}
 							</div>
 
-							{/* Bestseller */}
 							<div className="flex items-center gap-3">
 								<input
 									type="checkbox"
@@ -452,7 +443,6 @@ export default function EditProduct() {
 								</label>
 							</div>
 
-							{/* Submit */}
 							<button
 								type="submit"
 								disabled={isLoading}

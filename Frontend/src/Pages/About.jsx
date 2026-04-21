@@ -16,7 +16,6 @@ const About = () => {
 				</p>
 			</div>
 
-			{/* About Intro */}
 			<div className="px-6 md:px-16 lg:px-24 py-12">
 				<div className="bg-white shadow-lg rounded-2xl p-8 text-center max-w-4xl mx-auto">
 					<h2 className="text-2xl font-semibold mb-4">Who We Are</h2>
@@ -28,7 +27,6 @@ const About = () => {
 				</div>
 			</div>
 
-			{/* Mission & Vision Cards */}
 			<div className="px-6 md:px-16 lg:px-24 pb-12 grid md:grid-cols-2 gap-8">
 				<div className="bg-white shadow-md hover:shadow-xl transition duration-300 rounded-2xl p-6">
 					<h3 className="text-xl font-semibold mb-3">Our Mission</h3>
@@ -47,7 +45,6 @@ const About = () => {
 				</div>
 			</div>
 
-			{/* Features / Why Choose Us */}
 			<div className="bg-white py-12 px-6 md:px-16 lg:px-24">
 				<h2 className="text-2xl font-semibold text-center mb-10">
 					Why Choose Us

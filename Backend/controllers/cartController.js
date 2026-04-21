@@ -1,6 +1,5 @@
-import User from "../models/userModel.js"; 
+import User from "../models/userModel.js";
 import Product from "../models/productModel.js";
-
 
 export const addToCart = async (req, res) => {
 	try {
@@ -53,22 +52,18 @@ export const getCart = async (req, res) => {
 			});
 		}
 
-		// Get product IDs from cartData keys
 		const productIds = Object.keys(user.cartData);
 
-		// Fetch products (you can select only needed fields)
 		const products = await Product.find({ _id: { $in: productIds } }).select(
 			"name price images category subCategory variants", // adjust fields
 		);
 
-		// Build nice cart response
 		const cartItems = products.map((product) => ({
 			productId: product._id,
 			name: product.name,
 			price: product.price,
-			image: product.images?.[0] || "", // first image
+			image: product.images?.[0] || "", 
 			quantity: user.cartData[product._id.toString()],
-			// You can add stock check here later
 		}));
 
 		const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -77,7 +72,7 @@ export const getCart = async (req, res) => {
 			success: true,
 			cart: cartItems,
 			totalItems,
-			rawCartData: user.cartData, // optional – for debugging
+			rawCartData: user.cartData,
 		});
 	} catch (error) {
 		console.error(error);
@@ -106,7 +101,6 @@ export const updateCartItem = async (req, res) => {
 		const newQty = Number(quantity);
 
 		if (newQty <= 0) {
-			// Remove item if quantity ≤ 0
 			delete user.cartData[productId];
 		} else {
 			user.cartData[productId] = newQty;
@@ -156,23 +150,25 @@ export const removeFromCart = async (req, res) => {
 };
 
 export const clearCart = async (req, res) => {
-  try {
-    const userId = req.userId;
+	try {
+		const userId = req.userId;
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+		const user = await User.findById(userId);
+		if (!user) {
+			return res
+				.status(404)
+				.json({ success: false, message: "User not found" });
+		}
 
-    user.cartData = {};        // Clear the cart
-    await user.save();
+		user.cartData = {};
+		await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Cart cleared successfully",
-    });
-  } catch (error) {
-    console.error("Clear cart error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
+		res.status(200).json({
+			success: true,
+			message: "Cart cleared successfully",
+		});
+	} catch (error) {
+		console.error("Clear cart error:", error);
+		res.status(500).json({ success: false, message: "Server error" });
+	}
 };

@@ -3,7 +3,7 @@ import { apiRequest, imgBaseURL } from "../Services/API";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import SideBar from "../Components/SideBar";   // ← Added Sidebar
+import SideBar from "../Components/SideBar";   
 
 const AdminOrders = () => {
 	const [orders, setOrders] = useState([]);
@@ -18,7 +18,6 @@ const AdminOrders = () => {
 
 	const limit = 10;
 
-	// Admin Protection
 	useEffect(() => {
 		if (authLoading) return;
 
@@ -171,7 +170,6 @@ const AdminOrders = () => {
 									</select>
 								</div>
 
-								{/* Items */}
 								<div className="space-y-5">
 									{order.items.map((item, index) => (
 										<div key={index} className="flex gap-6 items-center">
@@ -211,7 +209,6 @@ const AdminOrders = () => {
 						))}
 					</div>
 
-					{/* Pagination */}
 					{totalPages > 1 && (
 						<div className="flex justify-center gap-4 mt-12">
 							<button

@@ -2,7 +2,6 @@ import User from "../../models/userModel.js"; // Make sure path is correct
 import { verifyToken } from "./verifyToken.js";
 
 export const verifyTokenAndAdmin = async (req, res, next) => {
-	// First verify the token using your existing function
 	verifyToken(req, res, async () => {
 		try {
 			const user = await User.findById(req.userId).select("role");
@@ -17,8 +16,7 @@ export const verifyTokenAndAdmin = async (req, res, next) => {
 				});
 			}
 
-			// If user is admin, proceed
-			req.userRole = "admin"; // Optional: attach role for future use
+			req.userRole = "admin"; 
 			next();
 		} catch (error) {
 			console.error(error);

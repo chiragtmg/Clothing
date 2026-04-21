@@ -13,11 +13,10 @@ export default function AddItems() {
 	const [success, setSuccess] = useState("");
 	const { currentUser } = useContext(AuthContext);
 	const navigate = useNavigate();
-	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth(); // ← Destructure here
+	const { isLoggedIn, isAdmin, loading: authLoading } = useAuth(); 
 
 	useEffect(() => {
-		if (authLoading) return; // Wait until auth is loaded
-
+		if (authLoading) return; 
 		if (!isLoggedIn) {
 			toast.error("Please login first");
 			navigate("/login");
@@ -55,13 +54,11 @@ export default function AddItems() {
 		setFormData((prev) => {
 			const exists = prev.variants.some((v) => v.size === size);
 			if (exists) {
-				// Remove completely
 				return {
 					...prev,
 					variants: prev.variants.filter((v) => v.size !== size),
 				};
 			}
-			// Add with default stock 0
 			return {
 				...prev,
 				variants: [...prev.variants, { size, stock: 0 }],
@@ -142,7 +139,6 @@ export default function AddItems() {
 		setError("");
 		setSuccess("");
 
-		// Basic validation
 		if (selectedFiles.length === 0) {
 			setError("Please upload at least one image");
 			setIsLoading(false);
@@ -214,10 +210,8 @@ export default function AddItems() {
 	return (
 		<div className="min-h-screen bg-gray-100">
 			<div className="grid grid-cols-1 md:grid-cols-[240px_1fr]">
-				{/* Sidebar */}
 				<SideBar />
 
-				{/* Main Content */}
 				<main className="p-6 md:p-8">
 					<div className="flex items-center justify-between mb-8">
 						<h1 className="text-2xl md:text-3xl font-bold text-gray-900">
@@ -228,13 +222,11 @@ export default function AddItems() {
 						</button>
 					</div>
 
-					{/* Form Card */}
 					<div className="bg-white rounded-xl shadow-lg p-6 md:p-8 max-w-3xl mx-auto">
 						<h2 className="text-xl font-semibold text-gray-800 mb-6">
 							Add New Product
 						</h2>
 
-						{/* Messages */}
 						{error && (
 							<div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
 								{error}
@@ -246,7 +238,6 @@ export default function AddItems() {
 							</div>
 						)}
 
-						{/* Images */}
 						<div className="mb-8">
 							<label className="block text-sm font-medium text-gray-700 mb-2">
 								Product Images (Max 3)
@@ -298,7 +289,6 @@ export default function AddItems() {
 						</div>
 
 						<form className="space-y-6" onSubmit={handleSubmit}>
-							{/* Name */}
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-1.5">
 									Product name *
@@ -314,7 +304,6 @@ export default function AddItems() {
 								/>
 							</div>
 
-							{/* Description */}
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-1.5">
 									Product Description *
@@ -330,7 +319,6 @@ export default function AddItems() {
 								/>
 							</div>
 
-							{/* Category + Sub + Price */}
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 								<div>
 									<label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -388,7 +376,6 @@ export default function AddItems() {
 								</div>
 							</div>
 
-							{/* ─── SIZES & STOCK ──────────────────────────────────────── */}
 							<div>
 								<label className="block text-sm font-medium text-gray-700 mb-3">
 									Available Sizes & Stock *
@@ -442,7 +429,6 @@ export default function AddItems() {
 								)}
 							</div>
 
-							{/* Bestseller */}
 							<div className="flex items-center gap-3">
 								<input
 									type="checkbox"
@@ -460,7 +446,6 @@ export default function AddItems() {
 								</label>
 							</div>
 
-							{/* Submit */}
 							<button
 								type="submit"
 								disabled={isLoading}

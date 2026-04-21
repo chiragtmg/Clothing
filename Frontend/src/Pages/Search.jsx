@@ -17,7 +17,6 @@ const Search = () => {
 
         setProducts(productArray);
 
-        // random products for initial page
         const shuffled = [...productArray].sort(() => 0.5 - Math.random());
         setRandomProducts(shuffled.slice(0, 8));
 
@@ -29,7 +28,6 @@ const Search = () => {
     fetchProducts();
   }, []);
 
-  // filter products
   const displayProducts =
     search.trim() === ""
       ? randomProducts

@@ -177,7 +177,7 @@ const Checkout = () => {
 			});
 
 			if (res.data.success) {
-				// Redirect user to Khalti payment page
+				navigate("/khalti-success")
 				window.location.href = res.data.paymentUrl;
 			}
 		} catch (error) {
@@ -287,7 +287,6 @@ const Checkout = () => {
 						</div>
 					</div>
 
-					{/* Cart Totals & Payment Methods */}
 					<div className="bg-[#8bc6b3] rounded-3xl p-12 h-fit">
 						<h2 className="text-4xl font-bold text-gray-900 mb-10">
 							CART TOTALS
